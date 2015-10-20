@@ -1,6 +1,11 @@
 #include "joint.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+
+std::vector<Joint *> Joint::getChildren() const
+{
+    return children;
+}
 Joint::Joint()
 {
 
