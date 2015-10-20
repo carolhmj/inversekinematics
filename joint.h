@@ -26,6 +26,8 @@ private:
     Joint* parent;
     //Juntas filhas na hierarquia
     std::vector<Joint*> children;
+    //Último filho visitado, usado na função getNextChild
+    int lastChildVisited = 0;
 public:
     Joint();
     Joint(glm::vec3 offset);
@@ -34,7 +36,10 @@ public:
     void setLink(Link* l);
     void setParent(Joint* parent);
     void addChild(Joint *child);
+    std::vector<Joint*> getChildren() const;
+    Joint* getNextChild();
     void draw(glm::mat4 transformation);
+
 };
 
 #endif // JOINT_H

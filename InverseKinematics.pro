@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     joint.cpp \
     link.cpp \
-    glwidget.cpp
+    glwidget.cpp \
+    kinematic.cpp
 
 HEADERS  += mainwindow.h \
     joint.h \
     link.h \
-    glwidget.h
+    glwidget.h \
+    kinematic.h
 
 FORMS    += mainwindow.ui
 

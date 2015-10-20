@@ -47,6 +47,17 @@ void Joint::addChild(Joint* child)
     this->children.push_back(child);
 }
 
+Joint *Joint::getNextChild()
+{
+    if (this->lastChildVisited < this->children.size()){
+        return this->children.at(this->lastChildVisited);
+    } else {
+        this->lastChildVisited = 0;
+        return NULL;
+    }
+
+}
+
 /*
  * Recebe uma matriz de transformação vinda do link pai,
  * gera matrizes de transformação de acordo com os parâmetros da junta
