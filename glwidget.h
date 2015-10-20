@@ -5,6 +5,7 @@
 #include <QTimer>
 #include "joint.h"
 #include "link.h"
+#include "kinematic.h"
 
 class GLWidget : public QGLWidget
 {

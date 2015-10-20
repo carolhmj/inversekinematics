@@ -1,10 +1,15 @@
 #include "joint.h"
 #include <glm/gtc/matrix_transform.hpp>
-
+#include <QDebug>
 
 std::vector<Joint *> Joint::getChildren() const
 {
     return children;
+}
+
+float Joint::getCurrRotation() const
+{
+    return currRotation;
 }
 Joint::Joint()
 {
@@ -72,7 +77,8 @@ Joint *Joint::getNextChild()
 void Joint::draw(glm::mat4 transformation)
 {
     glm::mat4 jointTrans = glm::translate(glm::mat4(1.0f), this->offset);
-    glm::mat4 jointRot = glm::rotate(glm::mat4(1.0f), this->currRotation, glm::vec3(0,0,1));
+    //qDebug() << "rotation angle" << DEG2RAD(this->currRotation) << "\n";
+    glm::mat4 jointRot = glm::rotate(glm::mat4(1.0f), DEG2RAD(this->currRotation), glm::vec3(0,0,1));
 
     glm::mat4 concatTransform = transformation * jointTrans * jointRot;
     this->link->draw(concatTransform);

@@ -11,6 +11,7 @@ class Kinematic
 public:
     Kinematic();
     static void applyPose(Joint *root, std::vector<float> pose);
+    static std::vector<float> getPose(Joint *root);
 };
 
 #endif // KINEMATIC_H
