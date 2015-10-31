@@ -6,6 +6,7 @@
 #include "joint.h"
 #include "link.h"
 #include "kinematic.h"
+#include "projections.h"
 
 class GLWidget : public QGLWidget
 {

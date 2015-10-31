@@ -1,9 +1,7 @@
 #ifndef LINK_H
 #define LINK_H
 
-#include <glm/vec4.hpp>
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
+#include <eigen3/Eigen/Dense>
 #include <vector>
 
 /*
@@ -13,13 +11,13 @@ class Link
 {
 private:
     //Vértices do link
-    std::vector<glm::vec4> data;
+    std::vector<Eigen::Vector4f> data;
     //Ponto central dos dados
-    glm::vec3 centerPoint;
+    Eigen::Vector3f centerPoint;
 public:
     Link();
-    Link(std::vector<glm::vec4> data, glm::vec3 centerPoint);
-    void draw(glm::mat4 transform);
+    Link(std::vector<Eigen::Vector4f> data, Eigen::Vector3f centerPoint);
+    void draw(Eigen::Matrix4f transform);
 };
 
 #endif // LINK_H

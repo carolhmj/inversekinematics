@@ -1,8 +1,7 @@
 #ifndef JOINT_H
 #define JOINT_H
 
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
+#include <eigen3/Eigen/Dense>
 #include <link.h>
 #include <vector>
 #include <cfloat>
@@ -18,7 +17,7 @@ class Joint
 {
 private:
     //Offset da junta em relação ao pai
-    glm::vec3 offset;
+    Eigen::Vector3f offset;
     //Rotação da junta
     float currRotation;
     //Limites de rotação
@@ -33,8 +32,8 @@ private:
     unsigned int lastChildVisited = 0;
 public:
     Joint();
-    Joint(glm::vec3 offset);
-    Joint(glm::vec3 offset, float maxRotation, float minRotation);
+    Joint(Eigen::Vector3f offset);
+    Joint(Eigen::Vector3f offset, float maxRotation, float minRotation);
     void setCurrRotation(float r);
     float getCurrRotation() const;
     void setLink(Link* l);
@@ -42,7 +41,9 @@ public:
     void addChild(Joint *child);
     std::vector<Joint*> getChildren() const;
     Joint* getNextChild();
-    void draw(glm::mat4 transformation);
+    //Retorna o número de juntas na hierarquia
+    int numJointsHierarchy();
+    void draw(Eigen::Matrix4f transformation);
 };
 
 #endif // JOINT_H

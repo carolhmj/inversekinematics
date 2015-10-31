@@ -1,6 +1,8 @@
 #include "joint.h"
-#include <glm/gtc/matrix_transform.hpp>
 #include <QDebug>
+#include <eigen3/Eigen/Geometry>
+#include <eigen3/Eigen/Core>
+#include <queue>
 
 std::vector<Joint *> Joint::getChildren() const
 {
@@ -16,12 +18,12 @@ Joint::Joint()
 
 }
 
-Joint::Joint(glm::vec3 offset)
+Joint::Joint(Eigen::Vector3f offset)
 {
     this->offset = offset;
 }
 
-Joint::Joint(glm::vec3 offset, float maxRotation, float minRotation)
+Joint::Joint(Eigen::Vector3f offset, float maxRotation, float minRotation)
 {
     this->offset = offset;
     this->maxRotation = maxRotation;
@@ -68,19 +70,55 @@ Joint *Joint::getNextChild()
 
 }
 
+std::vector<Joint*> Joint::flattenHierarchy()
+{
+    Joint *curr = NULL;
+    std::vector<Joint*> pose;
+    std::queue<Joint*> jointList;
+    jointList.push(root);
+    while (jointList.size() > 0){
+        curr = jointList.front();
+        jointList.pop();
+        pose.push_back(curr);
+        std::vector<Joint*> children = curr->getChildren();
+        if (children.size() > 0){
+            jointList.insert(jointList.end(),children.begin(),children.end());
+        }
+    }
+    return pose;
+}
+
+int Joint::numJointsHierarchy()
+{
+
+    if (children.empty()){  //Está numa folha
+        return 1;
+    } else { //Percorre a hierarquia e vê quantos filhos existem
+        int acum = 0;
+        for (auto c : this->children){
+            acum += c->numJointsHierarchy();
+        }
+        return acum + 1; //Adiciona ele próprio
+    }
+
+}
+
 /*
  * Recebe uma matriz de transformação vinda do link pai,
  * gera matrizes de transformação de acordo com os parâmetros da junta
  * (seu offset e seu ângulo atual), concatena e passa para o link
  * para desenho
  */
-void Joint::draw(glm::mat4 transformation)
+void Joint::draw(Eigen::Matrix4f transformation)
 {
-    glm::mat4 jointTrans = glm::translate(glm::mat4(1.0f), this->offset);
-    //qDebug() << "rotation angle" << DEG2RAD(this->currRotation) << "\n";
-    glm::mat4 jointRot = glm::rotate(glm::mat4(1.0f), DEG2RAD(this->currRotation), glm::vec3(0,0,1));
 
-    glm::mat4 concatTransform = transformation * jointTrans * jointRot;
+    Eigen::Affine3f trans(Eigen::Translation3f(this->offset));
+    Eigen::Matrix4f jointTrans = trans.matrix();
+    //qDebug() << "rotation angle" << DEG2RAD(this->currRotation) << "\n";
+    Eigen::Affine3f rotation(Eigen::AngleAxisf(DEG2RAD(this->currRotation),Eigen::Vector3f(0.0,0.0,1.0)));
+    Eigen::Matrix4f jointRot = rotation.matrix();
+
+    Eigen::Matrix4f concatTransform = transformation * jointTrans * jointRot;
     this->link->draw(concatTransform);
 
     for (const auto &childJoint : this->children) {

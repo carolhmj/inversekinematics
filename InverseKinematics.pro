@@ -17,14 +17,14 @@ SOURCES += main.cpp\
     joint.cpp \
     link.cpp \
     glwidget.cpp \
-    kinematic.cpp
+    kinematic.cpp \
+    projections.cpp
 
 HEADERS  += mainwindow.h \
     joint.h \
     link.h \
     glwidget.h \
-    kinematic.h
+    kinematic.h \
+    projections.h
 
 FORMS    += mainwindow.ui
-
-INCLUDEPATH += $$PWD/glm/
