@@ -8,7 +8,8 @@
 #include <cmath>
 
 #define DEG2RAD(x) float(x * (M_PI / 180.0))
-
+#define DRAWJOINTS true
+#define JOINTRADIUS 0.01
 /*
  * Classe que representa uma junta de uma figura articulada. Por enquanto vou
  * trabalhar apenas com juntas rotacionais 1D. 
@@ -16,6 +17,8 @@
 class Joint
 {
 private:
+    //Posição da junta em coordenadas do mundo. Varia dependendo da transformação passada para a junta
+    Eigen::Vector4f position;
     //Offset da junta em relação ao pai
     Eigen::Vector3f offset;
     //Rotação da junta
@@ -23,9 +26,9 @@ private:
     //Limites de rotação
     float maxRotation = FLT_MAX, minRotation = FLT_MIN;
     //Link associado
-    Link* link;
+    Link* link = NULL;
     //Junta pai na hierarquia
-    Joint* parent;
+    Joint* parent = NULL;
     //Juntas filhas na hierarquia
     std::vector<Joint*> children;
     //Último filho visitado, usado na função getNextChild
@@ -41,9 +44,13 @@ public:
     void addChild(Joint *child);
     std::vector<Joint*> getChildren() const;
     Joint* getNextChild();
+    //Retorna toda a hierarquia a partir dessa junta como uma lista de juntas
+    std::vector<Joint*> flattenHierarchy();
     //Retorna o número de juntas na hierarquia
     int numJointsHierarchy();
     void draw(Eigen::Matrix4f transformation);
+    Eigen::Vector4f getPosition() const;
+    Link *getLink() const;
 };
 
 #endif // JOINT_H

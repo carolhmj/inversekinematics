@@ -3,6 +3,7 @@
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/Core>
 #include <queue>
+#include "GL/gl.h"
 
 std::vector<Joint *> Joint::getChildren() const
 {
@@ -13,6 +14,11 @@ float Joint::getCurrRotation() const
 {
     return currRotation;
 }
+
+Link *Joint::getLink() const
+{
+    return link;
+}
 Joint::Joint()
 {
 
@@ -21,6 +27,7 @@ Joint::Joint()
 Joint::Joint(Eigen::Vector3f offset)
 {
     this->offset = offset;
+    this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
 Joint::Joint(Eigen::Vector3f offset, float maxRotation, float minRotation)
@@ -28,6 +35,7 @@ Joint::Joint(Eigen::Vector3f offset, float maxRotation, float minRotation)
     this->offset = offset;
     this->maxRotation = maxRotation;
     this->minRotation = minRotation;
+    this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
 void Joint::setCurrRotation(float r)
@@ -75,14 +83,16 @@ std::vector<Joint*> Joint::flattenHierarchy()
     Joint *curr = NULL;
     std::vector<Joint*> pose;
     std::queue<Joint*> jointList;
-    jointList.push(root);
+    jointList.push(this);
     while (jointList.size() > 0){
         curr = jointList.front();
         jointList.pop();
         pose.push_back(curr);
         std::vector<Joint*> children = curr->getChildren();
         if (children.size() > 0){
-            jointList.insert(jointList.end(),children.begin(),children.end());
+            for (auto &c : children) {
+                jointList.push(c);
+            }
         }
     }
     return pose;
@@ -119,6 +129,26 @@ void Joint::draw(Eigen::Matrix4f transformation)
     Eigen::Matrix4f jointRot = rotation.matrix();
 
     Eigen::Matrix4f concatTransform = transformation * jointTrans * jointRot;
+
+    Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
+    if (this->parent != NULL) {
+        //qDebug() << "non-null parent\n";
+        pos = this->parent->getPosition();
+    }
+    this->position = concatTransform * pos;
+    //qDebug() << "position: " << this->position[0] << " " << this->position[1] << " " << this->position[2] << "\n";
+    //Desenha a junta como um círculo
+    if (DRAWJOINTS) {
+        glColor3f(1,0,0);
+        glBegin(GL_LINE_LOOP);
+            for (int i=0; i < 360; i++) {
+               float degInRad = DEG2RAD(i);
+               glVertex2f(this->position[0] + cos(degInRad)*JOINTRADIUS, this->position[1] + sin(degInRad)*JOINTRADIUS);
+            }
+        glEnd();
+        glColor3f(1,1,1);
+    }
+
     this->link->draw(concatTransform);
 
     for (const auto &childJoint : this->children) {
@@ -126,3 +156,8 @@ void Joint::draw(Eigen::Matrix4f transformation)
     }
 }
 
+
+Eigen::Vector4f Joint::getPosition() const
+{
+    return position;
+}

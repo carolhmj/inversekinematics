@@ -1,6 +1,8 @@
 #include "kinematic.h"
 #include <queue>
+#include <iostream>
 
+using namespace std;
 Kinematic::Kinematic()
 {
 
@@ -63,7 +65,7 @@ Eigen::MatrixXf Kinematic::jacobian(Joint *root, Eigen::Vector3f end)
     /* Linhas da Jacobiana. Dependem da quantidade de mudança que vai
      * ocorrer (se apenas linear ou se linear e rotacional)
      */
-    int numRows = 3;
+    int numRows = 2;
     /* Colunas da Jacobiana. Dependem da quantidade de juntas que temos
      */
     int numCols = root->numJointsHierarchy();
@@ -73,7 +75,6 @@ Eigen::MatrixXf Kinematic::jacobian(Joint *root, Eigen::Vector3f end)
 
     //Juntas num vetor para bem maior conveniência
     std::vector<Joint*> joints = root->flattenHierarchy();
-
     //Eixo de rotação
     Eigen::Vector3f rotationAxis(0.0,0.0,1.0);
     /* Colocando os termos na matrix. Sabemos que a mudança linear
@@ -81,9 +82,7 @@ Eigen::MatrixXf Kinematic::jacobian(Joint *root, Eigen::Vector3f end)
      */
     for (int j = 0; j < numCols; j++){
         //Vetor da junta ao end effector
-        Eigen::Vector3f jointToEnd;
-        //Precisamos primeiro encontrar a posição da junta em coordenadas globais, e para isso, precisamos da transformação dela!
-        //jointToEnd = end - Eigen::Vector3f();
+        Eigen::Vector3f jointToEnd = end - joints.at(j)->getPosition().head<3>();
         Eigen::Vector3f cross = rotationAxis.cross(jointToEnd);
         for (int i = 0; i < numRows; i++){
             jacobian(i,j) = cross(i);
@@ -91,5 +90,74 @@ Eigen::MatrixXf Kinematic::jacobian(Joint *root, Eigen::Vector3f end)
     }
 
     return jacobian;
+}
+
+/*
+ * Dado um end effector e o alvo desejado, calcula os ângulos das juntas para o end effector alcançar aquele alvo
+ * Para isso calcula a jacobiana, a pseudoinversa, e resolve para encontrar os ângulos
+ */
+Eigen::Vector4f Kinematic::inverseKinematics(Joint *root, Eigen::Vector3f end, Eigen::Vector3f target, int timestep)
+{
+    cout << "target - end: " << target-end << "\n";
+    //Vetor velocidade
+    Eigen::Vector2f v = ((target - end)/timestep).head<2>();
+    cout << "velocidade" << v << "\n";
+    //Jacobiana
+    Eigen::MatrixXf J = jacobian(root,end);
+    cout << "jacobiana\n" << J << "\n";
+    /*
+     * Aplicando os passos mostrados na página 209 do livro
+     */
+    //Eigen::MatrixXf m = J * J.transpose();
+    Eigen::Vector2f beta = (J * J.transpose()).householderQr().solve(v);
+    cout << "beta\n" << beta << "\n";
+    Eigen::VectorXf thetaVar = J.transpose() * beta;
+    cout << "thetaVar:\n" << thetaVar << "\n";
+    //Atualizando os ângulos
+    std::vector<Joint*> joints = root->flattenHierarchy();
+    int i = 0;
+    for (auto &j : joints) {
+        float updatedAngle = j->getCurrRotation() + thetaVar(i)*timestep;
+        j->setCurrRotation(updatedAngle);
+        i++;
+    }
+    flush(cout);
+    return Eigen::Vector4f(0,0,0,0);
+}
+
+/*
+ * Dado um end effector e o link contendo o end effector (ponto do meio), calcula os ângulos das juntas para o
+ * end effector alcançar aquele alvo.
+ * Para isso calcula a jacobiana, a pseudoinversa, e resolve para encontrar os ângulos
+ */
+void Kinematic::inverseKinematics(Joint *root, int linkEnd, Eigen::Vector3f target, int timestep)
+{
+    //Pegamos todas as juntas para encontrarmos o end effector
+    std::vector<Joint*> joints = root->flattenHierarchy();
+    if (linkEnd >= joints.size()) {
+        return;
+    }
+    Eigen::Vector3f end = joints.at(linkEnd)->getLink()->getCenterPointTransformed();
+    cout << "end" << end << "\n";
+    //Vetor velocidade
+    Eigen::Vector2f v = ((target - end)/timestep).head<2>();
+    cout << "velocidade" << v << "\n";
+    //Jacobiana
+    Eigen::MatrixXf J = jacobian(root,end);
+    cout << "jacobiana\n" << J << "\n";
+    /*
+     * Aplicando os passos mostrados na página 209 do livro
+     */
+    Eigen::Vector2f beta = (J * J.transpose()).householderQr().solve(v);
+    cout << "beta\n" << beta << "\n";
+    Eigen::VectorXf thetaVar = J.transpose() * beta;
+    cout << "thetaVar:\n" << thetaVar << "\n";
+    int i = 0;
+    for (auto &j : joints) {
+        float updatedAngle = j->getCurrRotation() + thetaVar(i)*timestep;
+        j->setCurrRotation(updatedAngle);
+        i++;
+    }
+    flush(cout);
 }
 
