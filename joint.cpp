@@ -10,7 +10,7 @@ std::vector<Joint *> Joint::getChildren() const
     return children;
 }
 
-float Joint::getCurrRotation() const
+Eigen::Quaternionf Joint::getCurrRotation() const
 {
     return currRotation;
 }
@@ -30,7 +30,7 @@ Joint::Joint(Eigen::Vector3f offset)
     this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
-Joint::Joint(Eigen::Vector3f offset, float maxRotation, float minRotation)
+Joint::Joint(Eigen::Vector3f offset, Eigen::Quaternionf maxRotation, Eigen::Quaternionf minRotation)
 {
     this->offset = offset;
     this->maxRotation = maxRotation;
@@ -38,17 +38,19 @@ Joint::Joint(Eigen::Vector3f offset, float maxRotation, float minRotation)
     this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
-void Joint::setCurrRotation(float r)
+void Joint::setCurrRotation(Eigen::Quaternionf r)
 {
-    float rot;
-    if (r > this->maxRotation) {
-        rot = this->maxRotation;
-    } else if (r < this->minRotation) {
-        rot = this->minRotation;
-    } else {
-        rot = r;
-    }
     this->currRotation = rot;
+}
+
+void Joint::setCurrRotation(float x, float y, float z)
+{
+    //Transforma os ângulos em ângulo-eixo
+    Eigen::AngleAxisf xRotation(x, Eigen::Vector3f::UnitX());
+    Eigen::AngleAxisf yRotation(y, Eigen::Vector3f::UnitY());
+    Eigen::AngleAxisf zRotation(z, Eigen::Vector3f::UnitZ());
+
+    this->currRotation = xRotation * yRotation * zRotation;
 }
 
 void Joint::setLink(Link *l)

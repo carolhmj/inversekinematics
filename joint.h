@@ -2,6 +2,7 @@
 #define JOINT_H
 
 #include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Geometry>
 #include <link.h>
 #include <vector>
 #include <cfloat>
@@ -22,9 +23,9 @@ private:
     //Offset da junta em relação ao pai
     Eigen::Vector3f offset;
     //Rotação da junta
-    float currRotation;
+    Eigen::Quaternionf currRotation;
     //Limites de rotação
-    float maxRotation = FLT_MAX, minRotation = FLT_MIN;
+    Eigen::Quaternionf maxRotation, minRotation;
     //Link associado
     Link* link = NULL;
     //Junta pai na hierarquia
