@@ -4,6 +4,9 @@
 #include <eigen3/Eigen/Dense>
 #include <vector>
 
+#define DEG2RAD(x) float(x * (M_PI / 180.0))
+#define CENTERPOINTRADIUS 0.01
+
 /*
  * Classe que representa o link de uma figura articulada
  */

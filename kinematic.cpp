@@ -134,11 +134,15 @@ void Kinematic::inverseKinematics(Joint *root, int linkEnd, Eigen::Vector3f targ
 {
     //Pegamos todas as juntas para encontrarmos o end effector
     std::vector<Joint*> joints = root->flattenHierarchy();
+    for (auto &j : joints) {
+        cout << j->getCurrRotation() << "\n";
+    }
     if (linkEnd >= joints.size()) {
         return;
     }
     Eigen::Vector3f end = joints.at(linkEnd)->getLink()->getCenterPointTransformed();
-    cout << "end" << end << "\n";
+    cout << "end\n" << end << "\n";
+    cout << "target\n" << target << "\n";
     //Vetor velocidade
     Eigen::Vector2f v = ((target - end)/timestep).head<2>();
     cout << "velocidade" << v << "\n";

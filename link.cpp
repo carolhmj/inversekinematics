@@ -35,6 +35,18 @@ Link::Link(std::vector<Eigen::Vector4f> data, Eigen::Vector3f centerPoint)
 
 void Link::draw(Eigen::Matrix4f transform)
 {
+    Eigen::Vector4f centerPMod(centerPoint[0],centerPoint[1],centerPoint[2],1);
+    this->centerPointTransformed = (transform * centerPMod).head<3>();
+    //cout << "center point trans:\n" << this->centerPointTransformed << "\n";
+    glColor3f(0,1,0);
+    glBegin(GL_LINE_LOOP);
+        for (int i=0; i < 360; i++) {
+           float degInRad = DEG2RAD(i);
+           glVertex2f(this->centerPointTransformed[0] + cos(degInRad)*CENTERPOINTRADIUS, this->centerPointTransformed[1] + sin(degInRad)*CENTERPOINTRADIUS);
+        }
+    glEnd();
+    glColor3f(1,1,1);
+
     glBegin(GL_TRIANGLE_FAN);
     for (const auto &v : this->data){
         auto vTrans = transform * v;
@@ -42,15 +54,5 @@ void Link::draw(Eigen::Matrix4f transform)
     }
     glEnd();
 
-    glPointSize(5);
-    glColor3f(0,1,0);
-    glBegin(GL_POINTS);
-    Eigen::Vector4f centerPMod(centerPoint[0],centerPoint[1],centerPoint[2],1);
-    centerPointTransformed = (transform * centerPMod).head<3>();
-    //cout << "center point transformed: " << centerPointTransformed << "\n";
-    glVertex3f(centerPointTransformed(0),centerPointTransformed(1),centerPointTransformed(2));
-    glEnd();
-    //glPointSize(1);
-    //glColor3f(1,1,1);
 }
 
