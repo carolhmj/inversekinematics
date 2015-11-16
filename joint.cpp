@@ -10,14 +10,20 @@ std::vector<Joint *> Joint::getChildren() const
     return children;
 }
 
+Link *Joint::getLink() const
+{
+    return link;
+}
+
 Eigen::Quaternionf Joint::getCurrRotation() const
 {
     return currRotation;
 }
 
-Link *Joint::getLink() const
+
+Eigen::Quaternionf Joint::getAcumRotation() const
 {
-    return link;
+    return acumRotation;
 }
 Joint::Joint()
 {
@@ -30,7 +36,7 @@ Joint::Joint(Eigen::Vector3f offset)
     this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
-Joint::Joint(Eigen::Vector3f offset, Eigen::Quaternionf maxRotation, Eigen::Quaternionf minRotation)
+Joint::Joint(Eigen::Vector3f offset, Eigen::Vector3f maxRotation, Eigen::Vector3f minRotation)
 {
     this->offset = offset;
     this->maxRotation = maxRotation;
@@ -38,19 +44,39 @@ Joint::Joint(Eigen::Vector3f offset, Eigen::Quaternionf maxRotation, Eigen::Quat
     this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
-void Joint::setCurrRotation(Eigen::Quaternionf r)
+void Joint::setCurrRotation(Eigen::Vector3f r)
 {
-    this->currRotation = rot;
+    if (r[0] > this->minRotation[0] && r[0] < this->maxRotation[0]){
+        if (r[1] > this->minRotation[1] && r[1] < this->maxRotation[1]){
+            if (r[2] > this->minRotation[2] && r[2] < this->maxRotation[2]){
+                this->currRotationEuler = r;
+                setCurrRotation(r[0],r[1],r[2]);
+            }
+        }
+    }
+
 }
 
 void Joint::setCurrRotation(float x, float y, float z)
 {
-    //Transforma os ângulos em ângulo-eixo
-    Eigen::AngleAxisf xRotation(x, Eigen::Vector3f::UnitX());
-    Eigen::AngleAxisf yRotation(y, Eigen::Vector3f::UnitY());
-    Eigen::AngleAxisf zRotation(z, Eigen::Vector3f::UnitZ());
+    this->currRotationEuler = Eigen::Vector3f(x,y,z);
 
+    //Transforma os ângulos em ângulo-eixo
+    Eigen::AngleAxisf xRotation(DEG2RAD(x), Eigen::Vector3f::UnitX());
+    Eigen::AngleAxisf yRotation(DEG2RAD(y), Eigen::Vector3f::UnitY());
+    Eigen::AngleAxisf zRotation(DEG2RAD(z), Eigen::Vector3f::UnitZ());
+
+    //Concatena e normaliza para formar o quaternion
     this->currRotation = xRotation * yRotation * zRotation;
+    this->currRotation.normalize();
+
+    //Guarda o eixo de rotação
+    this->rotationAxis = Eigen::AngleAxisf(currRotation).axis();
+}
+
+Eigen::Vector3f Joint::getCurrRotationEuler() const
+{
+    return this->currRotationEuler;
 }
 
 void Joint::setLink(Link *l)
@@ -127,17 +153,22 @@ void Joint::draw(Eigen::Matrix4f transformation)
     Eigen::Affine3f trans(Eigen::Translation3f(this->offset));
     Eigen::Matrix4f jointTrans = trans.matrix();
     //qDebug() << "rotation angle" << DEG2RAD(this->currRotation) << "\n";
-    Eigen::Affine3f rotation(Eigen::AngleAxisf(DEG2RAD(this->currRotation),Eigen::Vector3f(0.0,0.0,1.0)));
+    Eigen::Affine3f rotation(this->currRotation);
     Eigen::Matrix4f jointRot = rotation.matrix();
 
     Eigen::Matrix4f concatTransform = transformation * jointTrans * jointRot;
 
     Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
+    this->acumRotation = this->currRotation;
     if (this->parent != NULL) {
         //qDebug() << "non-null parent\n";
         pos = this->parent->getPosition();
+        this->acumRotation *= this->parent->getAcumRotation();
     }
     this->position = concatTransform * pos;
+
+
+
     //qDebug() << "position: " << this->position[0] << " " << this->position[1] << " " << this->position[2] << "\n";
     //Desenha a junta como um círculo
     if (DRAWJOINTS) {

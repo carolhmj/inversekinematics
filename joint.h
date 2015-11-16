@@ -22,10 +22,15 @@ private:
     Eigen::Vector4f position;
     //Offset da junta em relação ao pai
     Eigen::Vector3f offset;
-    //Rotação da junta
+    //Rotação da junta, em euler e quaternion
+    Eigen::Vector3f currRotationEuler;
     Eigen::Quaternionf currRotation;
+    //Eixo de rotação do quaternion, necessário para os cálculos de cinemática inversa
+    Eigen::Vector3f rotationAxis;
+    //Quaternion acumulado com o pai
+    Eigen::Quaternionf acumRotation;
     //Limites de rotação
-    Eigen::Quaternionf maxRotation, minRotation;
+    Eigen::Vector3f maxRotation = Eigen::Vector3f(FLT_MAX,FLT_MAX,FLT_MAX), minRotation = Eigen::Vector3f(FLT_MIN,FLT_MIN,FLT_MIN);
     //Link associado
     Link* link = NULL;
     //Junta pai na hierarquia
@@ -37,9 +42,10 @@ private:
 public:
     Joint();
     Joint(Eigen::Vector3f offset);
-    Joint(Eigen::Vector3f offset, float maxRotation, float minRotation);
-    void setCurrRotation(float r);
-    float getCurrRotation() const;
+    Joint(Eigen::Vector3f offset, Eigen::Vector3f maxRotation, Eigen::Vector3f minRotation);
+    void setCurrRotation(Eigen::Vector3f r);
+    void setCurrRotation(float x, float y, float z);
+    Eigen::Vector3f getCurrRotationEuler() const;
     void setLink(Link* l);
     void setParent(Joint* parent);
     void addChild(Joint *child);
@@ -52,6 +58,10 @@ public:
     void draw(Eigen::Matrix4f transformation);
     Eigen::Vector4f getPosition() const;
     Link *getLink() const;
+    Eigen::Quaternionf getCurrRotation() const;
+    Eigen::Quaternionf getAccumRotation();
+    Eigen::Vector3f getRotationAxis() const;
+    Eigen::Quaternionf getAcumRotation() const;
 };
 
 #endif // JOINT_H

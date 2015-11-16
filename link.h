@@ -19,9 +19,12 @@ private:
     Eigen::Vector3f centerPoint;
     //Ponto central dos dados de acordo com a transformação deles
     Eigen::Vector3f centerPointTransformed;
+    //Ordem de desenho dos vértices
+    std::vector<int> drawOrder;
 public:
     Link();
     Link(std::vector<Eigen::Vector4f> data, Eigen::Vector3f centerPoint);
+    Link(std::vector<Eigen::Vector4f> data, std::vector<int> drawOrder, Eigen::Vector3f centerPoint);
     void draw(Eigen::Matrix4f transform);
     Eigen::Vector3f getCenterPoint() const;
     void setCenterPoint(const Eigen::Vector3f &value);

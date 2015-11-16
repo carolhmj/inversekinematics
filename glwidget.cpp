@@ -1,6 +1,7 @@
 #include "glwidget.h"
 #include <QTimerEvent>
 #include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Geometry>
 #include <vector>
 #include <QDebug>
 #include <iostream>
@@ -21,31 +22,81 @@ GLWidget::GLWidget(QWidget *parent) :
 void GLWidget::initializeGL()
 {
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     glClearColor(0,0,0,1);
     this->root = new Joint(Eigen::Vector3f(0.0f,0.0f,0.0f));
+
     std::vector<Eigen::Vector4f> ldata1;
-    ldata1.push_back(Eigen::Vector4f(0.5,0,0,1));
-    ldata1.push_back(Eigen::Vector4f(0.5,2,0,1));
-    ldata1.push_back(Eigen::Vector4f(-0.5,2,0,1));
-    ldata1.push_back(Eigen::Vector4f(-0.5,0,0,1));
-    Link *l = new Link(ldata1,Eigen::Vector3f(0,1,0));
+    Eigen::Vector3f ldata1center(0,2,0);
+
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,-0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,-0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,-0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,-0.5,1));
+
+    Link *l = new Link(ldata1,ldata1center);
     this->root->setLink(l);
 
-    Joint* j1 = new Joint(Eigen::Vector3f(0.0f,2.0f,0.0f));
+    Joint* j1 = new Joint(Eigen::Vector3f(0.0f,4.0f,0.0f));
+    j1->setCurrRotation(0,0,90);
     this->root->addChild(j1);
-    Link *l1 = new Link(ldata1,Eigen::Vector3f(0,1,0));
+    Link *l1 = new Link(ldata1,ldata1center);
     j1->setLink(l1);
 
-    Joint* j2 = new Joint(Eigen::Vector3f(0.0f,2.0f,0.0f));
+    Joint* j2 = new Joint(Eigen::Vector3f(0.0f,4.0f,0.0f));
+    j2->setCurrRotation(0,0,90);
     j1->addChild(j2);
-    Link *l2 = new Link(ldata1, Eigen::Vector3f(0,1,0));
+    Link *l2 = new Link(ldata1, ldata1center);
     j2->setLink(l2);
 
-    std::vector<float> pose;
-    pose.push_back(0.0f);
-    pose.push_back(90.0f);
-    pose.push_back(30.0f);
-    Kinematic::applyPose(this->root, pose);
+//    std::vector<float> pose;
+//    pose.push_back(0.0f);
+//    pose.push_back(90.0f);
+//    pose.push_back(30.0f);
+//    Kinematic::applyPose(this->root, pose);
 
     projection = Projections::ortho(-5,5,-5,5,-5,5);
     view = Projections::lookAt(Eigen::Vector3f(0.0f,0.0f,1.0f),Eigen::Vector3f(0.0f,0.0f,0.0f),Eigen::Vector3f(0.0f,1.0f,0.0f));
@@ -53,9 +104,6 @@ void GLWidget::initializeGL()
     end << 0, 0, 0, 1;
 
     timer.start(1.6666);
-    //static const QMetaMethod valueChangedSignal = QMetaMethod::fromSignal(&this->timer::timeout);
-    qDebug() << "timer is active? " << timer.isActive() << "\n";
-    //qDebug() << "is signal connected? " << timer->isSignalConnected(valueChangedSignal);
 }
 
 void GLWidget::resizeGL(int w, int h)
@@ -82,6 +130,7 @@ void GLWidget::paintGL()
 
     drawCircle(endP.head<3>(), 0.02, colorEnd);
     drawCircle(targetP.head<3>(), 0.02, colorTarget);
+    Eigen::Affine3f x;
     this->root->draw(projection * view);
 }
 
@@ -106,13 +155,13 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     flush(cout);
 
     if (event->button() == Qt::LeftButton){
-        this->end = displayCoord;
+        //this->end = displayCoord;
     } else if (event->button() == Qt::RightButton){
         this->target = displayCoord;
         //this->target = worldCoord;
     } else if (event->button() == Qt::MidButton){
         //Kinematic::inverseKinematics(this->root, end.head<3>(), target.head<3>(), 1);
-        Kinematic::inverseKinematics(this->root, 2, target.head<3>(), 1);
+        //Kinematic::inverseKinematics(this->root, 2, target.head<3>(), 1);
     }
 
 

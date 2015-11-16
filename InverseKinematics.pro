@@ -18,13 +18,17 @@ SOURCES += main.cpp\
     link.cpp \
     glwidget.cpp \
     kinematic.cpp \
-    projections.cpp
+    projections.cpp \
+    drawing.cpp
 
 HEADERS  += mainwindow.h \
     joint.h \
     link.h \
     glwidget.h \
     kinematic.h \
-    projections.h
+    projections.h \
+    drawing.h
 
 FORMS    += mainwindow.ui
+
+LIBS += -lGLU
