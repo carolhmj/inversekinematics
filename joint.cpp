@@ -44,6 +44,11 @@ Joint::Joint(Eigen::Vector3f offset, Eigen::Vector3f maxRotation, Eigen::Vector3
     this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
+void Joint::setCurrRotation(Eigen::Quaternionf r)
+{
+    this->currRotation = r;
+}
+
 void Joint::setCurrRotation(Eigen::Vector3f r)
 {
     if (r[0] > this->minRotation[0] && r[0] < this->maxRotation[0]){

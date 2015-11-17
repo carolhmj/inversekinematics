@@ -87,7 +87,7 @@ void GLWidget::initializeGL()
     j1->setLink(l1);
 
     Joint* j2 = new Joint(Eigen::Vector3f(0.0f,4.0f,0.0f));
-    j2->setCurrRotation(0,0,90);
+    j2->setCurrRotation(45,0,90);
     j1->addChild(j2);
     Link *l2 = new Link(ldata1, ldata1center);
     j2->setLink(l2);
@@ -161,7 +161,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
         //this->target = worldCoord;
     } else if (event->button() == Qt::MidButton){
         //Kinematic::inverseKinematics(this->root, end.head<3>(), target.head<3>(), 1);
-        //Kinematic::inverseKinematics(this->root, 2, target.head<3>(), 1);
+        Kinematic::inverseKinematics(this->root, 2, target.head<3>(), Eigen::Quaternionf::Identity(), 1);
     }
 
 
