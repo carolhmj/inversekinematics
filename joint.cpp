@@ -5,6 +5,7 @@
 #include <queue>
 #include <iostream>
 #include "GL/gl.h"
+#include <QString>
 
 using namespace std;
 std::vector<Joint *> Joint::getChildren() const
@@ -193,16 +194,18 @@ void Joint::draw(Eigen::Matrix4f transformation)
     this->rotationAxisTransform = concatTransform * this->rotationAxis;
 
     Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
-    pos = transformation * pos;
-    if (this->parent != NULL) {
-        //qDebug() << "non-null parent\n";
-        pos = this->parent->getPosition();
-    }
-    this->position = transformation * pos;
+//    if (this->parent != NULL) {
+//        //qDebug() << "non-null parent\n";
+//        pos = this->parent->getPosition();
+//    }
+    this->position = concatTransform * pos;
     //qDebug() << "position: " << this->position[0] << " " << this->position[1] << " " << this->position[2] << "\n";
     //Desenha a junta como um círculo
     if (DRAWJOINTS) {
         glColor3f(1,0,0);
+        if (this->name == QString("rz")){
+            glColor3f(0,1,1);
+        }
         glBegin(GL_LINE_LOOP);
             for (int i=0; i < 360; i++) {
                float degInRad = DEG2RAD(i);

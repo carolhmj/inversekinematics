@@ -171,6 +171,7 @@ void GLWidget::paintGL()
     drawCircle(endP.head<3>(), 0.02, colorEnd);
     drawCircle(targetP.head<3>(), 0.02, colorTarget);
     this->root->draw(projection * view);
+    //this->root->draw(Eigen::Matrix4f::Identity());
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
