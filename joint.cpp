@@ -3,8 +3,10 @@
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/Core>
 #include <queue>
+#include <iostream>
 #include "GL/gl.h"
 
+using namespace std;
 std::vector<Joint *> Joint::getChildren() const
 {
     return children;
@@ -187,15 +189,16 @@ void Joint::draw(Eigen::Matrix4f transformation)
     Eigen::Matrix4f jointRot = rotation.matrix();
 
     Eigen::Matrix4f concatTransform = transformation * jointTrans * jointRot;
-
+    //Eigen::Matrix4f concatTransform = transformation * jointRot * jointTrans;
     this->rotationAxisTransform = concatTransform * this->rotationAxis;
 
     Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
+    pos = transformation * pos;
     if (this->parent != NULL) {
         //qDebug() << "non-null parent\n";
         pos = this->parent->getPosition();
     }
-    this->position = concatTransform * pos;
+    this->position = transformation * pos;
     //qDebug() << "position: " << this->position[0] << " " << this->position[1] << " " << this->position[2] << "\n";
     //Desenha a junta como um círculo
     if (DRAWJOINTS) {

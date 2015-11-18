@@ -106,10 +106,20 @@ void GLWidget::initializeGL()
     Link *l1 = new Link(ldata1,lcenter);
     jz->setLink(l1);
 
-//    Joint* j2 = new Joint(Eigen::Vector3f(0.0f,3.0f,0.0f));
-//    j1->addChild(j2);
-//    Link *l2 = new Link(ldata1, Eigen::Vector3f(0,2,0));
-//    j2->setLink(l2);
+    Joint *fx = new Joint(off, xAxis);
+    fx->setName(QString("fx"));
+    jz->addChild(fx);
+
+    Joint *fy = new Joint(offZero, yAxis);
+    fy->setName(QString("fy"));
+    fx->addChild(fy);
+
+    Joint *fz = new Joint(offZero, zAxis);
+    fz->setName(QString("fz"));
+    fy->addChild(fz);
+
+    Link *l2 = new Link(ldata1,lcenter);
+    fz->setLink(l2);
 
 //    std::vector<float> pose;
 //    pose.push_back(0.0f);

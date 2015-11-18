@@ -59,6 +59,7 @@ public:
     //Retorna o número de juntas na hierarquia
     int numJointsHierarchy();
     void draw(Eigen::Matrix4f transformation);
+    //void draw(Eigen::Matrix4f view, Eigen::Matrix4f model);
     Eigen::Vector4f getPosition() const;
     Link *getLink() const;
     QString getName() const;
