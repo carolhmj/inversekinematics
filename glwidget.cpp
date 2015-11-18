@@ -79,15 +79,16 @@ void GLWidget::initializeGL()
 
     Link *l = new Link(ldata1,ldata1center);
     this->root->setLink(l);
+    this->root->setCurrRotation(0,45,45);
 
     Joint* j1 = new Joint(Eigen::Vector3f(0.0f,4.0f,0.0f));
-    j1->setCurrRotation(0,0,90);
+    j1->setCurrRotation(0,0,0);
     this->root->addChild(j1);
     Link *l1 = new Link(ldata1,ldata1center);
     j1->setLink(l1);
 
     Joint* j2 = new Joint(Eigen::Vector3f(0.0f,4.0f,0.0f));
-    j2->setCurrRotation(45,0,90);
+    j2->setCurrRotation(0,0,0);
     j1->addChild(j2);
     Link *l2 = new Link(ldata1, ldata1center);
     j2->setLink(l2);
@@ -207,7 +208,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     qDebug() << "key event: " << event->key() << "\n";
     if (event->key() == Qt::Key_Space) {
         qDebug() << "inverse kinematics\n";
-        Kinematic::inverseKinematics(this->root, end.head<3>(), target.head<3>(), 1);
+        //Kinematic::inverseKinematics(this->root, end.head<3>(), target.head<3>(), 1);
     }
 }
 

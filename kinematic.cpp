@@ -160,7 +160,7 @@ void Kinematic::inverseKinematics(Joint *root, int linkEnd, Eigen::Vector3f targ
         Eigen::Quaternionf updatedRotation = Eigen::Quaternionf::Identity();
         updatedRotation = j->getCurrRotation().coeffs() + theta(i).coeffs()*timestep;
         updatedRotation.normalize();
-        j->setCurrRotation(updatedRotation);
+        //j->setCurrRotation(updatedRotation);
     }
 
     /*
