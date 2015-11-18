@@ -47,7 +47,7 @@ void Link::draw(Eigen::Matrix4f transform)
     glEnd();
     glColor3f(1,1,1);
 
-    glBegin(GL_TRIANGLE_FAN);
+    glBegin(GL_TRIANGLES);
     for (const auto &v : this->data){
         auto vTrans = transform * v;
         glVertex3f(vTrans(0), vTrans(1), vTrans(2));
