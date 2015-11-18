@@ -6,6 +6,7 @@
 #include <vector>
 #include <cfloat>
 #include <cmath>
+#include <QString>
 
 #define DEG2RAD(x) float(x * (M_PI / 180.0))
 #define DRAWJOINTS true
@@ -23,6 +24,10 @@ private:
     Eigen::Vector3f offset;
     //Rotação da junta
     float currRotation;
+    //Eixo de rotação da junta, em coordenadas locais
+    Eigen::Vector4f rotationAxis;
+    //Eixo de rotação da junta, em coordenadas do mundo
+    Eigen::Vector4f rotationAxisTransform;
     //Limites de rotação
     float maxRotation = FLT_MAX, minRotation = FLT_MIN;
     //Link associado
@@ -33,10 +38,15 @@ private:
     std::vector<Joint*> children;
     //Último filho visitado, usado na função getNextChild
     unsigned int lastChildVisited = 0;
+    //Nome da junta
+    QString name;
 public:
     Joint();
     Joint(Eigen::Vector3f offset);
     Joint(Eigen::Vector3f offset, float maxRotation, float minRotation);
+    Joint(Eigen::Vector3f offset, Eigen::Vector4f rotationAxis);
+    Joint(Eigen::Vector3f offset, Eigen::Vector4f rotationAxis, QString name);
+    Joint(Eigen::Vector3f offset, Eigen::Vector4f rotationAxis, float maxRotation, float minRotation);
     void setCurrRotation(float r);
     float getCurrRotation() const;
     void setLink(Link* l);
@@ -51,6 +61,10 @@ public:
     void draw(Eigen::Matrix4f transformation);
     Eigen::Vector4f getPosition() const;
     Link *getLink() const;
+    QString getName() const;
+    void setName(const QString &value);
+    Eigen::Vector4f getRotationAxis() const;
+    Eigen::Vector4f getRotationAxisTransform() const;
 };
 
 #endif // JOINT_H

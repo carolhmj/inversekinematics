@@ -19,6 +19,26 @@ Link *Joint::getLink() const
 {
     return link;
 }
+
+QString Joint::getName() const
+{
+    return name;
+}
+
+void Joint::setName(const QString &value)
+{
+    name = value;
+}
+
+Eigen::Vector4f Joint::getRotationAxis() const
+{
+    return rotationAxis;
+}
+
+Eigen::Vector4f Joint::getRotationAxisTransform() const
+{
+    return rotationAxisTransform;
+}
 Joint::Joint()
 {
 
@@ -27,6 +47,8 @@ Joint::Joint()
 Joint::Joint(Eigen::Vector3f offset)
 {
     this->offset = offset;
+    this->rotationAxis = Eigen::Vector4f::UnitZ();
+    this->rotationAxisTransform = rotationAxis;
     this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
@@ -35,6 +57,42 @@ Joint::Joint(Eigen::Vector3f offset, float maxRotation, float minRotation)
     this->offset = offset;
     this->maxRotation = maxRotation;
     this->minRotation = minRotation;
+    this->rotationAxis = Eigen::Vector4f::UnitZ();
+    this->rotationAxisTransform = rotationAxis;
+    this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
+}
+
+Joint::Joint(Eigen::Vector3f offset, Eigen::Vector4f rotationAxis)
+{
+    this->offset = offset;
+    this->maxRotation = maxRotation;
+    this->minRotation = minRotation;
+    this->rotationAxis = rotationAxis;
+    this->rotationAxis.normalize();
+    this->rotationAxisTransform = this->rotationAxis;
+    this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
+}
+
+Joint::Joint(Eigen::Vector3f offset, Eigen::Vector4f rotationAxis, QString name)
+{
+    this->offset = offset;
+    this->maxRotation = maxRotation;
+    this->minRotation = minRotation;
+    this->rotationAxis = rotationAxis;
+    this->rotationAxis.normalize();
+    this->rotationAxisTransform = this->rotationAxis;
+    this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
+    this->name = name;
+}
+
+Joint::Joint(Eigen::Vector3f offset, Eigen::Vector4f rotationAxis, float maxRotation, float minRotation)
+{
+    this->offset = offset;
+    this->maxRotation = maxRotation;
+    this->minRotation = minRotation;
+    this->rotationAxis = rotationAxis;
+    this->rotationAxis.normalize();
+    this->rotationAxisTransform = this->rotationAxis;
     this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
@@ -125,10 +183,12 @@ void Joint::draw(Eigen::Matrix4f transformation)
     Eigen::Affine3f trans(Eigen::Translation3f(this->offset));
     Eigen::Matrix4f jointTrans = trans.matrix();
     //qDebug() << "rotation angle" << DEG2RAD(this->currRotation) << "\n";
-    Eigen::Affine3f rotation(Eigen::AngleAxisf(DEG2RAD(this->currRotation),Eigen::Vector3f(0.0,0.0,1.0)));
+    Eigen::Affine3f rotation(Eigen::AngleAxisf(DEG2RAD(this->currRotation),this->rotationAxis.head<3>()));
     Eigen::Matrix4f jointRot = rotation.matrix();
 
     Eigen::Matrix4f concatTransform = transformation * jointTrans * jointRot;
+
+    this->rotationAxisTransform = concatTransform * this->rotationAxis;
 
     Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
     if (this->parent != NULL) {
@@ -149,8 +209,9 @@ void Joint::draw(Eigen::Matrix4f transformation)
         glColor3f(1,1,1);
     }
 
-    this->link->draw(concatTransform);
-
+    if (this->link != NULL) {
+        this->link->draw(concatTransform);
+    }
     for (const auto &childJoint : this->children) {
         childJoint->draw(concatTransform);
     }

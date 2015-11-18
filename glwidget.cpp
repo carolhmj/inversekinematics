@@ -22,30 +22,100 @@ void GLWidget::initializeGL()
 {
     glEnable(GL_DEPTH_TEST);
     glClearColor(0,0,0,1);
-    this->root = new Joint(Eigen::Vector3f(0.0f,0.0f,0.0f));
+
     std::vector<Eigen::Vector4f> ldata1;
-    ldata1.push_back(Eigen::Vector4f(0.5,0,0,1));
-    ldata1.push_back(Eigen::Vector4f(0.5,2,0,1));
-    ldata1.push_back(Eigen::Vector4f(-0.5,2,0,1));
-    ldata1.push_back(Eigen::Vector4f(-0.5,0,0,1));
-    Link *l = new Link(ldata1,Eigen::Vector3f(0,1,0));
-    this->root->setLink(l);
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
 
-    Joint* j1 = new Joint(Eigen::Vector3f(0.0f,2.0f,0.0f));
-    this->root->addChild(j1);
-    Link *l1 = new Link(ldata1,Eigen::Vector3f(0,1,0));
-    j1->setLink(l1);
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,-0.5,1));
 
-    Joint* j2 = new Joint(Eigen::Vector3f(0.0f,2.0f,0.0f));
-    j1->addChild(j2);
-    Link *l2 = new Link(ldata1, Eigen::Vector3f(0,1,0));
-    j2->setLink(l2);
+    ldata1.push_back(Eigen::Vector4f(0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
 
-    std::vector<float> pose;
-    pose.push_back(0.0f);
-    pose.push_back(90.0f);
-    pose.push_back(30.0f);
-    Kinematic::applyPose(this->root, pose);
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,-0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,-0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,3,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,-0.5,1));
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+
+    ldata1.push_back(Eigen::Vector4f(0.5,1,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,0.5,1));
+    ldata1.push_back(Eigen::Vector4f(-0.5,1,-0.5,1));
+
+    Eigen::Vector3f lcenter(0,2,0);
+    Eigen::Vector3f offZero(0,0,0);
+    Eigen::Vector3f off(0,3,0);
+    Eigen::Vector4f xAxis = Eigen::Vector4f::UnitX(), yAxis = Eigen::Vector4f::UnitY(), zAxis = Eigen::Vector4f::UnitZ();
+
+    this->root = new Joint(offZero,xAxis);
+    this->root->setName(QString("root (rx)"));
+    Joint* ry = new Joint(offZero,yAxis);
+    ry->setName(QString("ry"));
+    ry->setCurrRotation(45);
+    this->root->addChild(ry);
+
+    Joint* rz = new Joint(offZero,zAxis);
+    rz->setName(QString("rz"));
+    ry->addChild(rz);
+    rz->setCurrRotation(45);
+    Link *l = new Link(ldata1,lcenter);
+    rz->setLink(l);
+
+    Joint* jx = new Joint(off, xAxis);
+    jx->setName(QString("jx"));
+    rz->addChild(jx);
+
+    Joint* jy = new Joint(offZero,yAxis);
+    jy->setName(QString("jy"));
+    jx->addChild(jy);
+
+    Joint* jz = new Joint(offZero,zAxis);
+    jz->setName(QString("jz"));
+    jy->addChild(jz);
+
+    Link *l1 = new Link(ldata1,lcenter);
+    jz->setLink(l1);
+
+//    Joint* j2 = new Joint(Eigen::Vector3f(0.0f,3.0f,0.0f));
+//    j1->addChild(j2);
+//    Link *l2 = new Link(ldata1, Eigen::Vector3f(0,2,0));
+//    j2->setLink(l2);
+
+//    std::vector<float> pose;
+//    pose.push_back(0.0f);
+//    pose.push_back(90.0f);
+//    pose.push_back(30.0f);
+//    Kinematic::applyPose(this->root, pose);
 
     projection = Projections::ortho(-5,5,-5,5,-5,5);
     view = Projections::lookAt(Eigen::Vector3f(0.0f,0.0f,1.0f),Eigen::Vector3f(0.0f,0.0f,0.0f),Eigen::Vector3f(0.0f,1.0f,0.0f));
@@ -56,6 +126,14 @@ void GLWidget::initializeGL()
     //static const QMetaMethod valueChangedSignal = QMetaMethod::fromSignal(&this->timer::timeout);
     qDebug() << "timer is active? " << timer.isActive() << "\n";
     //qDebug() << "is signal connected? " << timer->isSignalConnected(valueChangedSignal);
+    Eigen::Vector3f x = Eigen::Vector3f::UnitX();
+    Eigen::Vector4f y;
+    y.head<3>() = x;
+    y(3) = 1;
+    cout << y << "\n";
+    y = Eigen::Vector4f::UnitY();
+    cout << y << "\n";
+    flush(cout);
 }
 
 void GLWidget::resizeGL(int w, int h)
@@ -112,7 +190,13 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
         //this->target = worldCoord;
     } else if (event->button() == Qt::MidButton){
         //Kinematic::inverseKinematics(this->root, end.head<3>(), target.head<3>(), 1);
-        Kinematic::inverseKinematics(this->root, 2, target.head<3>(), 1);
+        //Kinematic::inverseKinematics(this->root, 2, target.head<3>(), 1);
+        for (auto &c : this->root->flattenHierarchy()){
+            cout << "\n=======\njoint " << c->getName().toStdString();
+            cout << "\ntransformed joint point\n" << c->getPosition();
+            cout << "\ntransformed rotationaxis\n" << c->getRotationAxisTransform();
+        }
+        flush(cout);
     }
 
 
