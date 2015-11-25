@@ -3,22 +3,22 @@
 #include <iostream>
 using namespace std;
 
-Eigen::Vector3f Link::getCenterPoint() const
+Eigen::Vector4f Link::getCenterPoint() const
 {
     return centerPoint;
 }
 
-void Link::setCenterPoint(const Eigen::Vector3f &value)
+void Link::setCenterPoint(const Eigen::Vector4f &value)
 {
     centerPoint = value;
 }
 
-Eigen::Vector3f Link::getCenterPointTransformed() const
+Eigen::Vector4f Link::getCenterPointTransformed() const
 {
     return centerPointTransformed;
 }
 
-void Link::setCenterPointTransformed(const Eigen::Vector3f &value)
+void Link::setCenterPointTransformed(const Eigen::Vector4f &value)
 {
     centerPointTransformed = value;
 }
@@ -27,7 +27,7 @@ Link::Link()
 
 }
 
-Link::Link(std::vector<Eigen::Vector4f> data, Eigen::Vector3f centerPoint)
+Link::Link(std::vector<Eigen::Vector4f> data, Eigen::Vector4f centerPoint)
 {
     this->data = data;
     this->centerPoint = centerPoint;
@@ -35,9 +35,8 @@ Link::Link(std::vector<Eigen::Vector4f> data, Eigen::Vector3f centerPoint)
 
 void Link::draw(Eigen::Matrix4f transform)
 {
-    Eigen::Vector4f centerPMod(centerPoint[0],centerPoint[1],centerPoint[2],1);
-    this->centerPointTransformed = (transform * centerPMod).head<3>();
-    //cout << "center point trans:\n" << this->centerPointTransformed << "\n";
+
+    this->centerPointTransformed = transform * centerPoint;
     glColor3f(0,1,0);
     glBegin(GL_LINE_LOOP);
         for (int i=0; i < 360; i++) {

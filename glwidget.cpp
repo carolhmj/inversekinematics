@@ -14,7 +14,6 @@ using namespace std;
 GLWidget::GLWidget(QWidget *parent) :
     QGLWidget(parent)
 {
-    //qDebug() << "connecttest: " << QObject::connect(&timer,SIGNAL(timeout()),this,SLOT(update())) << "\n";
     connect(&timer,SIGNAL(timeout()),this,SLOT(update()));
 }
 
@@ -72,54 +71,69 @@ void GLWidget::initializeGL()
     ldata1.push_back(Eigen::Vector4f(-0.5,1,0.5,1));
     ldata1.push_back(Eigen::Vector4f(-0.5,1,-0.5,1));
 
-    Eigen::Vector3f lcenter(0,2,0);
+    Eigen::Vector4f lcenter(0,2,0,1);
     Eigen::Vector3f offZero(0,0,0);
     Eigen::Vector3f off(0,3,0);
     Eigen::Vector4f xAxis = Eigen::Vector4f::UnitX(), yAxis = Eigen::Vector4f::UnitY(), zAxis = Eigen::Vector4f::UnitZ();
 
     this->root = new Joint(offZero,xAxis);
-    this->root->setName(QString("root (rx)"));
+    this->root->setName("root (rx)");
     Joint* ry = new Joint(offZero,yAxis);
-    ry->setName(QString("ry"));
-    ry->setCurrRotation(45);
+    ry->setName("ry");
     this->root->addChild(ry);
 
     Joint* rz = new Joint(offZero,zAxis);
-    rz->setName(QString("rz"));
+    rz->setName("rz");
     ry->addChild(rz);
-    rz->setCurrRotation(45);
     Link *l = new Link(ldata1,lcenter);
     rz->setLink(l);
 
     Joint* jx = new Joint(off, xAxis);
-    jx->setName(QString("jx"));
+    jx->setName("jx");
     rz->addChild(jx);
 
     Joint* jy = new Joint(offZero,yAxis);
-    jy->setName(QString("jy"));
+    jy->setName("jy");
     jx->addChild(jy);
 
     Joint* jz = new Joint(offZero,zAxis);
-    jz->setName(QString("jz"));
+    jz->setName("jz");
     jy->addChild(jz);
 
     Link *l1 = new Link(ldata1,lcenter);
     jz->setLink(l1);
+    jz->setCurrRotation(90);
 
     Joint *fx = new Joint(off, xAxis);
-    fx->setName(QString("fx"));
+    fx->setName("fx");
     jz->addChild(fx);
 
     Joint *fy = new Joint(offZero, yAxis);
-    fy->setName(QString("fy"));
+    fy->setName("fy");
     fx->addChild(fy);
 
     Joint *fz = new Joint(offZero, zAxis);
-    fz->setName(QString("fz"));
+    fz->setName("fz");
     fy->addChild(fz);
 
     Link *l2 = new Link(ldata1,lcenter);
     fz->setLink(l2);
+    fz->setCurrRotation(90);
+
+    Joint *vx = new Joint(off, xAxis);
+    vx->setName("vx");
+    fz->addChild(vx);
+
+    Joint *vy = new Joint(offZero, yAxis);
+    vy->setName("vy");
+    vx->addChild(vy);
+
+    Joint *vz = new Joint(offZero, zAxis);
+    vz->setName("vz");
+    vy->addChild(vz);
+
+    Link *l3 = new Link(ldata1,lcenter);
+    vz->setLink(l3);
 
 //    std::vector<float> pose;
 //    pose.push_back(0.0f);
@@ -127,7 +141,7 @@ void GLWidget::initializeGL()
 //    pose.push_back(30.0f);
 //    Kinematic::applyPose(this->root, pose);
 
-    projection = Projections::ortho(-5,5,-5,5,-5,5);
+    projection = Projections::ortho(-10,10,-10,10,-10,10);
     view = Projections::lookAt(Eigen::Vector3f(0.0f,0.0f,1.0f),Eigen::Vector3f(0.0f,0.0f,0.0f),Eigen::Vector3f(0.0f,1.0f,0.0f));
     target << 0, 0, 0, 1;
     end << 0, 0, 0, 1;
@@ -170,6 +184,7 @@ void GLWidget::paintGL()
 
     drawCircle(endP.head<3>(), 0.02, colorEnd);
     drawCircle(targetP.head<3>(), 0.02, colorTarget);
+    //Kinematic::inverseKinematics(this->root, 11, target, Eigen::Vector3f(0,0,0), 100);
     this->root->draw(projection * view);
     //this->root->draw(Eigen::Matrix4f::Identity());
 }
@@ -196,17 +211,22 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 
     if (event->button() == Qt::LeftButton){
         this->end = displayCoord;
+        int i = 0;
+        for (auto j : this->root->flattenHierarchy()){
+            cout << "joint " << i << " " << j->getName() << "\n";
+            i++;
+        }
+
     } else if (event->button() == Qt::RightButton){
         this->target = displayCoord;
         //this->target = worldCoord;
     } else if (event->button() == Qt::MidButton){
-        //Kinematic::inverseKinematics(this->root, end.head<3>(), target.head<3>(), 1);
-        //Kinematic::inverseKinematics(this->root, 2, target.head<3>(), 1);
-        for (auto &c : this->root->flattenHierarchy()){
-            cout << "\n=======\njoint " << c->getName().toStdString();
-            cout << "\ntransformed joint point\n" << c->getPosition();
-            cout << "\ntransformed rotationaxis\n" << c->getRotationAxisTransform();
-        }
+        Kinematic::inverseKinematics(this->root, 11, target, Eigen::Vector3f(0,180,0), 1);
+//        for (auto &c : this->root->flattenHierarchy()){
+//            cout << "\n=======\njoint " << c->getName().toStdString();
+//            cout << "\ntransformed joint point\n" << c->getPosition();
+//            cout << "\ntransformed rotationaxis\n" << c->getRotationAxisTransform();
+//        }
         flush(cout);
     }
 
@@ -253,7 +273,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     qDebug() << "key event: " << event->key() << "\n";
     if (event->key() == Qt::Key_Space) {
         qDebug() << "inverse kinematics\n";
-        Kinematic::inverseKinematics(this->root, end.head<3>(), target.head<3>(), 1);
+        //Kinematic::inverseKinematics(this->root, end.head<3>(), target.head<3>(), 1);
     }
 }
 

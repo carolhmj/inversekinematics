@@ -23,12 +23,12 @@ Link *Joint::getLink() const
     return link;
 }
 
-QString Joint::getName() const
+string Joint::getName() const
 {
     return name;
 }
 
-void Joint::setName(const QString &value)
+void Joint::setName(const string &value)
 {
     name = value;
 }
@@ -41,6 +41,11 @@ Eigen::Vector4f Joint::getRotationAxis() const
 Eigen::Vector4f Joint::getRotationAxisTransform() const
 {
     return rotationAxisTransform;
+}
+
+Joint *Joint::getParent() const
+{
+    return parent;
 }
 Joint::Joint()
 {
@@ -76,7 +81,7 @@ Joint::Joint(Eigen::Vector3f offset, Eigen::Vector4f rotationAxis)
     this->position = Eigen::Vector4f(0.0,0.0,0.0,1.0);
 }
 
-Joint::Joint(Eigen::Vector3f offset, Eigen::Vector4f rotationAxis, QString name)
+Joint::Joint(Eigen::Vector3f offset, Eigen::Vector4f rotationAxis, string name)
 {
     this->offset = offset;
     this->maxRotation = maxRotation;
@@ -191,7 +196,8 @@ void Joint::draw(Eigen::Matrix4f transformation)
 
     Eigen::Matrix4f concatTransform = transformation * jointTrans * jointRot;
     //Eigen::Matrix4f concatTransform = transformation * jointRot * jointTrans;
-    this->rotationAxisTransform = concatTransform * this->rotationAxis;
+
+    //std::cout << "concatTransform in joint " << this->name << "\n" << concatTransform << "\n";
 
     Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
 //    if (this->parent != NULL) {
@@ -199,19 +205,38 @@ void Joint::draw(Eigen::Matrix4f transformation)
 //        pos = this->parent->getPosition();
 //    }
     this->position = concatTransform * pos;
-    //qDebug() << "position: " << this->position[0] << " " << this->position[1] << " " << this->position[2] << "\n";
+    //std::cout << "position in joint " << this->name << "\n" << this->position << "\n";
+    Eigen::Vector4f rotatedAxis = concatTransform * this->rotationAxis;
+    this->rotationAxisTransform = Eigen::Vector4f(position[0] + rotatedAxis[0], position[1] + rotatedAxis[1], position[2] + rotatedAxis[2], 0);
+//    std::cout << "rotationAxis in joint " << this->name << "\n" << this->rotationAxisTransform << "\n";
+//    flush(std::cout);
+//    std::cout << "xxxxxxxxx\n";
+//    flush(std::cout);
     //Desenha a junta como um círculo
     if (DRAWJOINTS) {
         glColor3f(1,0,0);
-        if (this->name == QString("rz")){
-            glColor3f(0,1,1);
-        }
+        //Desenha um círculo que representa a junta
         glBegin(GL_LINE_LOOP);
             for (int i=0; i < 360; i++) {
                float degInRad = DEG2RAD(i);
                glVertex2f(this->position[0] + cos(degInRad)*JOINTRADIUS, this->position[1] + sin(degInRad)*JOINTRADIUS);
             }
         glEnd();
+        //Desenha as juntas
+        if (this->name[0] == 'r') {
+            glColor3f(1,0,0);
+        } else if (this->name[0] == 'j'){
+            glColor3f(0,1,0);
+        } else if (this->name[0] == 'f'){
+            glColor3f(0,0,1);
+        } else if (this->name[0] == 'v'){
+            glColor3f(0,1,1);
+        }
+
+            glBegin(GL_LINES);
+                glVertex3f(position(0), position(1), position(2));
+                glVertex3f(rotationAxisTransform(0), rotationAxisTransform(1), rotationAxisTransform(2));
+            glEnd();
         glColor3f(1,1,1);
     }
 
