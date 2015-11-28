@@ -12,8 +12,8 @@
 #define DRAWJOINTS true
 #define JOINTRADIUS 0.01
 /*
- * Classe que representa uma junta de uma figura articulada. Por enquanto vou
- * trabalhar apenas com juntas rotacionais 1D. 
+ * Classe que representa uma junta de uma figura articulada.
+ * Vamos tentar mudar a representação de orientação
  */
 class Joint
 {
