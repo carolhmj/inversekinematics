@@ -80,6 +80,7 @@ void GLWidget::initializeGL()
     this->root->setName("root (rx)");
     Joint* ry = new Joint(offZero,yAxis);
     ry->setName("ry");
+    ry->setCurrRotation(45);
     this->root->addChild(ry);
 
     Joint* rz = new Joint(offZero,zAxis);
@@ -94,6 +95,7 @@ void GLWidget::initializeGL()
 
     Joint* jy = new Joint(offZero,yAxis);
     jy->setName("jy");
+    jy->setCurrRotation(45);
     jx->addChild(jy);
 
     Joint* jz = new Joint(offZero,zAxis);

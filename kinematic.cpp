@@ -87,7 +87,7 @@ Eigen::MatrixXf Kinematic::jacobian(Joint *root, Eigen::Vector4f endPos)
      * eixo de rotação dado em coordenadas do mundo
      */
     for (int j = 0; j < numCols; j++){
-        cout << "analysing joint " << joints.at(i)->getName() << ":\n";
+        cout << "analysing joint " << joints.at(j)->getName() << ":\n";
         rotationAxis = joints.at(j)->getRotationAxisTransform().head<3>();
         cout << "rotationaxis\n" << rotationAxis << "\n";
         jointToEnd = (endPos - joints.at(j)->getPosition()).head<3>();
@@ -207,7 +207,8 @@ void Kinematic::inverseKinematics(Joint *root, int linkEnd, Eigen::Vector4f targ
     Eigen::Vector3f v = ((targetPos - end)/timestep).head<3>();
     cout << "velocidade\n" << v << "\n";
     //Vetor velocidade de rotação
-    Joint* parentJoint = joint->parent, grandparentJoint = parentJoint->parent;
+    Joint* parentJoint = joint->getParent();
+    Joint* grandparentJoint = parentJoint->getParent();
     Eigen::Vector3f rotation(grandparentJoint->getCurrRotation(), parentJoint->getCurrRotation(), joint->getCurrRotation());
     cout << "rotation\n" << rotation << "\n";
     Eigen::Vector3f a = (targetRot - rotation) / timestep;
