@@ -25,7 +25,7 @@ private:
     //Rotação da junta, em euler e quaternion
     Eigen::Vector3f currRotationEuler;
     Eigen::Quaternionf currRotation;
-    //Eixo de rotação do quaternion, necessário para os cálculos de cinemática inversa
+    //Representação da orientação por scaled axis
     Eigen::Vector3f rotationAxis;
     //Quaternion acumulado com o pai
     Eigen::Quaternionf acumRotation;
