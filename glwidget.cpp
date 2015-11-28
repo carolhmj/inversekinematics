@@ -99,7 +99,7 @@ void GLWidget::initializeGL()
 //    pose.push_back(30.0f);
 //    Kinematic::applyPose(this->root, pose);
 
-    projection = Projections::ortho(-5,5,-5,5,-5,5);
+    projection = Projections::ortho(-10,10,-10,10,-10,10);
     view = Projections::lookAt(Eigen::Vector3f(0.0f,0.0f,1.0f),Eigen::Vector3f(0.0f,0.0f,0.0f),Eigen::Vector3f(0.0f,1.0f,0.0f));
     target << 0, 0, 0, 1;
     end << 0, 0, 0, 1;

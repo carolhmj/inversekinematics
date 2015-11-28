@@ -165,11 +165,7 @@ void Joint::draw(Eigen::Matrix4f transformation)
 
     Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
     this->acumRotation = this->currRotation;
-    if (this->parent != NULL) {
-        //qDebug() << "non-null parent\n";
-        pos = this->parent->getPosition();
-        this->acumRotation *= this->parent->getAcumRotation();
-    }
+    this->acumRotation.normalize();
     this->position = concatTransform * pos;
 
 

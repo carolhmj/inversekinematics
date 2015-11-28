@@ -94,7 +94,7 @@ Eigen::MatrixXf Kinematic::jacobian(Joint *root, Eigen::Vector3f end)
         }
         //Mudança rotacional
         for (int i = 3; i < 6; i++){
-            jacobian(i,j) = rotationAxis(i);
+            jacobian(i,j) = rotationAxis(3-i);
         }
     }
 
@@ -117,7 +117,6 @@ void Kinematic::inverseKinematics(Joint *root, int linkEnd, Eigen::Vector3f targ
         return;
     }
 
-    //Eeeeeeeeh vamos ver se dá certo
     Eigen::Vector3f endPos = joints.at(linkEnd)->getLink()->getCenterPointTransformed();
     Eigen::Quaternionf endRot = joints.at(linkEnd)->getCurrRotation();
 
@@ -129,8 +128,10 @@ void Kinematic::inverseKinematics(Joint *root, int linkEnd, Eigen::Vector3f targ
         v(i) = Eigen::Quaternionf(x(i), 0, 0, 0);
     }
     //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
+    Eigen::Quaternionf diff = targetRot * endRot.inverse();
+    diff.normalize();
     for (int i = 3; i < 6; i++) {
-        v(i) = targetRot * endRot.inverse();
+        v(i) = diff[3-i];
     }
 
 //    cout << "velocidade" << v << "\n";
