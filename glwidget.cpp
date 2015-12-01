@@ -93,18 +93,12 @@ void GLWidget::initializeGL()
     Link *l2 = new Link(ldata1, ldata1center);
     j2->setLink(l2);
 
-//    std::vector<float> pose;
-//    pose.push_back(0.0f);
-//    pose.push_back(90.0f);
-//    pose.push_back(30.0f);
-//    Kinematic::applyPose(this->root, pose);
-
     projection = Projections::ortho(-10,10,-10,10,-10,10);
     view = Projections::lookAt(Eigen::Vector3f(0.0f,0.0f,1.0f),Eigen::Vector3f(0.0f,0.0f,0.0f),Eigen::Vector3f(0.0f,1.0f,0.0f));
     target << 0, 0, 0, 1;
     end << 0, 0, 0, 1;
 
-    timer.start(1.6666);
+    timer.start(16.6666);
 }
 
 void GLWidget::resizeGL(int w, int h)

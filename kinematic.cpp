@@ -130,39 +130,39 @@ void Kinematic::inverseKinematics(Joint *root, int linkEnd, Eigen::Vector3f targ
     //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
     Eigen::Quaternionf diff = targetRot * endRot.inverse();
     diff.normalize();
-    for (int i = 3; i < 6; i++) {
-        v(i) = diff[3-i];
-    }
+//    for (int i = 3; i < 6; i++) {
+//        v(i) = diff[3-i];
+//    }
 
-//    cout << "velocidade" << v << "\n";
-    //Jacobiana
-    Eigen::MatrixXf J = jacobian(root,endPos);
-//    cout << "jacobiana\n" << J << "\n";
+////    cout << "velocidade" << v << "\n";
+//    //Jacobiana
+//    Eigen::MatrixXf J = jacobian(root,endPos);
+////    cout << "jacobiana\n" << J << "\n";
 
-    /*
-     * Como eu não sei se é possível fazer o Eigen trabalhar com matrizes de quaternions,
-     * vou usar o método da jacobiana transposta
-     */
-    Eigen::MatrixXf JT = J.transpose();
-    Eigen::Matrix<Eigen::Quaternionf, 6, 1> theta;
-    for (int i = 0; i < JT.rows(); i++){
-        Eigen::Quaternionf sum = Eigen::Quaternionf::Identity();
-        for (int j = 0; j < JT.cols(); j++){
-            Eigen::Quaternionf q(JT(i,j) * v(j).coeffs());
-            q.normalize();
-            sum = sum.coeffs() + q.coeffs();
-        }
-        theta(i) = sum;
-    }
+//    /*
+//     * Como eu não sei se é possível fazer o Eigen trabalhar com matrizes de quaternions,
+//     * vou usar o método da jacobiana transposta
+//     */
+//    Eigen::MatrixXf JT = J.transpose();
+//    Eigen::Matrix<Eigen::Quaternionf, 6, 1> theta;
+//    for (int i = 0; i < JT.rows(); i++){
+//        Eigen::Quaternionf sum = Eigen::Quaternionf::Identity();
+//        for (int j = 0; j < JT.cols(); j++){
+//            Eigen::Quaternionf q(JT(i,j) * v(j).coeffs());
+//            q.normalize();
+//            sum = sum.coeffs() + q.coeffs();
+//        }
+//        theta(i) = sum;
+//    }
 
-    //Atualizando...
-    int i = 0;
-    for (auto &j : joints) {
-        Eigen::Quaternionf updatedRotation = Eigen::Quaternionf::Identity();
-        updatedRotation = j->getCurrRotation().coeffs() + theta(i).coeffs()*timestep;
-        updatedRotation.normalize();
-        //j->setCurrRotation(updatedRotation);
-    }
+//    //Atualizando...
+//    int i = 0;
+//    for (auto &j : joints) {
+//        Eigen::Quaternionf updatedRotation = Eigen::Quaternionf::Identity();
+//        updatedRotation = j->getCurrRotation().coeffs() + theta(i).coeffs()*timestep;
+//        updatedRotation.normalize();
+//        //j->setCurrRotation(updatedRotation);
+//    }
 
     /*
      * Aplicando os passos mostrados na página 209 do livro

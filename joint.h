@@ -12,8 +12,8 @@
 #define DRAWJOINTS true
 #define JOINTRADIUS 0.01
 /*
- * Classe que representa uma junta de uma figura articulada. Por enquanto vou
- * trabalhar apenas com juntas rotacionais 1D. 
+ * Classe que representa uma junta de uma figura articulada. Trabalhando
+ * agora com juntas ball cuja orientação é dada por um quaternion
  */
 class Joint
 {
@@ -25,7 +25,7 @@ private:
     //Rotação da junta, em euler e quaternion
     Eigen::Vector3f currRotationEuler;
     Eigen::Quaternionf currRotation;
-    //Representação da orientação por scaled axis
+    //Eixo de rotação
     Eigen::Vector3f rotationAxis;
     //Quaternion acumulado com o pai
     Eigen::Quaternionf acumRotation;
