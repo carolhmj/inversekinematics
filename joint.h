@@ -13,7 +13,8 @@
 #define JOINTRADIUS 0.01
 /*
  * Classe que representa uma junta de uma figura articulada.
- * Vamos tentar mudar a representação de orientação
+ * Vamos tentar mudar a representação de orientação para scaled
+ * axis
  */
 class Joint
 {

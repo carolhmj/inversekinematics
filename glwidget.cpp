@@ -76,72 +76,33 @@ void GLWidget::initializeGL()
     Eigen::Vector3f off(0,3,0);
     Eigen::Vector4f xAxis = Eigen::Vector4f::UnitX(), yAxis = Eigen::Vector4f::UnitY(), zAxis = Eigen::Vector4f::UnitZ();
 
-    this->root = new Joint(offZero,xAxis);
-    this->root->setName("root (rx)");
-    Joint* ry = new Joint(offZero,yAxis);
-    ry->setName("ry");
-    ry->setCurrRotation(45);
-    this->root->addChild(ry);
-
-    Joint* rz = new Joint(offZero,zAxis);
-    rz->setName("rz");
-    ry->addChild(rz);
+    this->root = new Joint(offZero,zAxis);
+    root->setName("rz");
     Link *l = new Link(ldata1,lcenter);
-    rz->setLink(l);
+    root->setLink(l);
 
-    Joint* jx = new Joint(off, xAxis);
-    jx->setName("jx");
-    rz->addChild(jx);
-
-    Joint* jy = new Joint(offZero,yAxis);
-    jy->setName("jy");
-    jy->setCurrRotation(45);
-    jx->addChild(jy);
-
-    Joint* jz = new Joint(offZero,zAxis);
+    Joint* jz = new Joint(off,zAxis);
     jz->setName("jz");
-    jy->addChild(jz);
+    root->addChild(jz);
 
     Link *l1 = new Link(ldata1,lcenter);
     jz->setLink(l1);
     jz->setCurrRotation(90);
 
-    Joint *fx = new Joint(off, xAxis);
-    fx->setName("fx");
-    jz->addChild(fx);
-
-    Joint *fy = new Joint(offZero, yAxis);
-    fy->setName("fy");
-    fx->addChild(fy);
-
-    Joint *fz = new Joint(offZero, zAxis);
+    Joint *fz = new Joint(off, zAxis);
     fz->setName("fz");
-    fy->addChild(fz);
+    jz->addChild(fz);
 
     Link *l2 = new Link(ldata1,lcenter);
     fz->setLink(l2);
     fz->setCurrRotation(90);
 
-    Joint *vx = new Joint(off, xAxis);
-    vx->setName("vx");
-    fz->addChild(vx);
-
-    Joint *vy = new Joint(offZero, yAxis);
-    vy->setName("vy");
-    vx->addChild(vy);
-
     Joint *vz = new Joint(offZero, zAxis);
     vz->setName("vz");
-    vy->addChild(vz);
+    fz->addChild(vz);
 
     Link *l3 = new Link(ldata1,lcenter);
     vz->setLink(l3);
-
-//    std::vector<float> pose;
-//    pose.push_back(0.0f);
-//    pose.push_back(90.0f);
-//    pose.push_back(30.0f);
-//    Kinematic::applyPose(this->root, pose);
 
     projection = Projections::ortho(-10,10,-10,10,-10,10);
     view = Projections::lookAt(Eigen::Vector3f(0.0f,0.0f,1.0f),Eigen::Vector3f(0.0f,0.0f,0.0f),Eigen::Vector3f(0.0f,1.0f,0.0f));
@@ -186,7 +147,7 @@ void GLWidget::paintGL()
 
     drawCircle(endP.head<3>(), 0.02, colorEnd);
     drawCircle(targetP.head<3>(), 0.02, colorTarget);
-    //Kinematic::inverseKinematics(this->root, 11, target, Eigen::Vector3f(0,0,0), 100);
+    Kinematic::inverseKinematics(this->root, 3, target, Eigen::AngleAxisf(0, Eigen::Vector3f(1,0,0)), 1);
     this->root->draw(projection * view);
     //this->root->draw(Eigen::Matrix4f::Identity());
 }
@@ -223,7 +184,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
         this->target = displayCoord;
         //this->target = worldCoord;
     } else if (event->button() == Qt::MidButton){
-        Kinematic::inverseKinematics(this->root, 11, target, Eigen::Vector3f(0,180,0), 1);
+        Kinematic::inverseKinematics(this->root, 3, target, Eigen::AngleAxisf(0, Eigen::Vector3f(1,0,0)), 1);
 //        for (auto &c : this->root->flattenHierarchy()){
 //            cout << "\n=======\njoint " << c->getName().toStdString();
 //            cout << "\ntransformed joint point\n" << c->getPosition();

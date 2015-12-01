@@ -200,14 +200,10 @@ void Joint::draw(Eigen::Matrix4f transformation)
     //std::cout << "concatTransform in joint " << this->name << "\n" << concatTransform << "\n";
 
     Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
-//    if (this->parent != NULL) {
-//        //qDebug() << "non-null parent\n";
-//        pos = this->parent->getPosition();
-//    }
     this->position = concatTransform * pos;
     //std::cout << "position in joint " << this->name << "\n" << this->position << "\n";
-    Eigen::Vector4f rotatedAxis = concatTransform * this->rotationAxis;
-    this->rotationAxisTransform = Eigen::Vector4f(position[0] + rotatedAxis[0], position[1] + rotatedAxis[1], position[2] + rotatedAxis[2], 0);
+    this->rotationAxisTransform = concatTransform * this->rotationAxis;
+    this->rotationAxisTransform.normalize();
 //    std::cout << "rotationAxis in joint " << this->name << "\n" << this->rotationAxisTransform << "\n";
 //    flush(std::cout);
 //    std::cout << "xxxxxxxxx\n";
@@ -235,7 +231,7 @@ void Joint::draw(Eigen::Matrix4f transformation)
 
             glBegin(GL_LINES);
                 glVertex3f(position(0), position(1), position(2));
-                glVertex3f(rotationAxisTransform(0), rotationAxisTransform(1), rotationAxisTransform(2));
+                glVertex3f(position(0) + rotationAxisTransform(0), position(1) + rotationAxisTransform(1), position(2) + rotationAxisTransform(2));
             glEnd();
         glColor3f(1,1,1);
     }
