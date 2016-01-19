@@ -35,7 +35,6 @@ Link::Link(std::vector<Eigen::Vector4f> data, Eigen::Vector4f centerPoint)
 
 void Link::draw(Eigen::Matrix4f transform)
 {
-
     this->centerPointTransformed = transform * centerPoint;
     glColor3f(0,1,0);
     glBegin(GL_LINE_LOOP);

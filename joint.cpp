@@ -179,15 +179,8 @@ int Joint::numJointsHierarchy()
 
 }
 
-/*
- * Recebe uma matriz de transformação vinda do link pai,
- * gera matrizes de transformação de acordo com os parâmetros da junta
- * (seu offset e seu ângulo atual), concatena e passa para o link
- * para desenho
- */
-void Joint::draw(Eigen::Matrix4f transformation)
+void Joint::updateTransforms(Eigen::Matrix4f transformation)
 {
-
     Eigen::Affine3f trans(Eigen::Translation3f(this->offset));
     Eigen::Matrix4f jointTrans = trans.matrix();
     //qDebug() << "rotation angle" << DEG2RAD(this->currRotation) << "\n";
@@ -207,11 +200,28 @@ void Joint::draw(Eigen::Matrix4f transformation)
     this->position = concatTransform * pos;
     //std::cout << "position in joint " << this->name << "\n" << this->position << "\n";
     Eigen::Vector4f rotatedAxis = concatTransform * this->rotationAxis;
-    this->rotationAxisTransform = Eigen::Vector4f(position[0] + rotatedAxis[0], position[1] + rotatedAxis[1], position[2] + rotatedAxis[2], 0);
+//    this->rotationAxisTransform = Eigen::Vector4f(position[0] + rotatedAxis[0], position[1] + rotatedAxis[1], position[2] + rotatedAxis[2], 0);
+    this->rotationAxisTransform = rotatedAxis;
+    this->transform = concatTransform;
 //    std::cout << "rotationAxis in joint " << this->name << "\n" << this->rotationAxisTransform << "\n";
 //    flush(std::cout);
 //    std::cout << "xxxxxxxxx\n";
 //    flush(std::cout);
+    for (const auto &childJoint : this->children) {
+        childJoint->updateTransforms(concatTransform);
+    }
+}
+
+/*
+ * Recebe uma matriz de transformação vinda do link pai,
+ * gera matrizes de transformação de acordo com os parâmetros da junta
+ * (seu offset e seu ângulo atual), concatena e passa para o link
+ * para desenho
+ */
+void Joint::draw(Eigen::Matrix4f transformation)
+{
+
+    Eigen::Vector4f drawPosition = transformation * this->position;
     //Desenha a junta como um círculo
     if (DRAWJOINTS) {
         glColor3f(1,0,0);
@@ -219,7 +229,7 @@ void Joint::draw(Eigen::Matrix4f transformation)
         glBegin(GL_LINE_LOOP);
             for (int i=0; i < 360; i++) {
                float degInRad = DEG2RAD(i);
-               glVertex2f(this->position[0] + cos(degInRad)*JOINTRADIUS, this->position[1] + sin(degInRad)*JOINTRADIUS);
+               glVertex2f(drawPosition[0] + cos(degInRad)*JOINTRADIUS, drawPosition[1] + sin(degInRad)*JOINTRADIUS);
             }
         glEnd();
         //Desenha as juntas
@@ -232,19 +242,21 @@ void Joint::draw(Eigen::Matrix4f transformation)
         } else if (this->name[0] == 'v'){
             glColor3f(0,1,1);
         }
-
+        Eigen::Vector4f rotatedAxis = transformation * this->rotationAxisTransform;
+            Eigen::Vector4f vdraw(drawPosition[0] + rotatedAxis[0], drawPosition[1] + rotatedAxis[1], drawPosition[2] + rotatedAxis[2], 0);
             glBegin(GL_LINES);
-                glVertex3f(position(0), position(1), position(2));
-                glVertex3f(rotationAxisTransform(0), rotationAxisTransform(1), rotationAxisTransform(2));
+                glVertex3f(drawPosition(0), drawPosition(1), drawPosition(2));
+                //glVertex3f(rotationAxisTransform(0), rotationAxisTransform(1), rotationAxisTransform(2));
+                glVertex3f(vdraw(0), vdraw(1), vdraw(2));
             glEnd();
         glColor3f(1,1,1);
     }
 
     if (this->link != NULL) {
-        this->link->draw(concatTransform);
+        this->link->draw(transformation*this->transform);
     }
     for (const auto &childJoint : this->children) {
-        childJoint->draw(concatTransform);
+        childJoint->draw(transformation);
     }
 }
 

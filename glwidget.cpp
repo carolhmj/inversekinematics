@@ -80,7 +80,7 @@ void GLWidget::initializeGL()
     this->root->setName("root (rx)");
     Joint* ry = new Joint(offZero,yAxis);
     ry->setName("ry");
-    ry->setCurrRotation(45);
+    //ry->setCurrRotation(45);
     this->root->addChild(ry);
 
     Joint* rz = new Joint(offZero,zAxis);
@@ -95,7 +95,7 @@ void GLWidget::initializeGL()
 
     Joint* jy = new Joint(offZero,yAxis);
     jy->setName("jy");
-    jy->setCurrRotation(45);
+    //jy->setCurrRotation(45);
     jx->addChild(jy);
 
     Joint* jz = new Joint(offZero,zAxis);
@@ -137,12 +137,7 @@ void GLWidget::initializeGL()
     Link *l3 = new Link(ldata1,lcenter);
     vz->setLink(l3);
 
-//    std::vector<float> pose;
-//    pose.push_back(0.0f);
-//    pose.push_back(90.0f);
-//    pose.push_back(30.0f);
-//    Kinematic::applyPose(this->root, pose);
-
+    root->updateTransforms(Eigen::Matrix4f::Identity());
     projection = Projections::ortho(-10,10,-10,10,-10,10);
     view = Projections::lookAt(Eigen::Vector3f(0.0f,0.0f,1.0f),Eigen::Vector3f(0.0f,0.0f,0.0f),Eigen::Vector3f(0.0f,1.0f,0.0f));
     target << 0, 0, 0, 1;
@@ -186,9 +181,10 @@ void GLWidget::paintGL()
 
     drawCircle(endP.head<3>(), 0.02, colorEnd);
     drawCircle(targetP.head<3>(), 0.02, colorTarget);
-    //Kinematic::inverseKinematics(this->root, 11, target, Eigen::Vector3f(0,0,0), 100);
+    //Kinematic::inverseKinematics(this->root, 11, target, Eigen::Vector3f(0,0,0), 1);
+    Kinematic::inverseKinematics(this->root, 11, Eigen::Vector4f(3,0,0,1), Eigen::Vector3f(0,0,90), 1);
     this->root->draw(projection * view);
-    //this->root->draw(Eigen::Matrix4f::Identity());
+//    this->root->draw(Eigen::Matrix4f::Identity());
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
@@ -223,7 +219,8 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
         this->target = displayCoord;
         //this->target = worldCoord;
     } else if (event->button() == Qt::MidButton){
-        Kinematic::inverseKinematics(this->root, 11, target, Eigen::Vector3f(0,180,0), 1);
+//        Kinematic::inverseKinematics(this->root, 11, target, Eigen::Vector3f(0,0,90), 1);
+        Kinematic::inverseKinematics(this->root, 11, Eigen::Vector4f(0,0,0,1), Eigen::Vector3f(0,0,90), 1);
 //        for (auto &c : this->root->flattenHierarchy()){
 //            cout << "\n=======\njoint " << c->getName().toStdString();
 //            cout << "\ntransformed joint point\n" << c->getPosition();

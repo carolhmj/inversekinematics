@@ -40,6 +40,9 @@ private:
     unsigned int lastChildVisited = 0;
     //Nome da junta
     std::string name;
+    //Matriz de transformação
+    Eigen::Matrix4f transform = Eigen::Matrix4f::Identity();
+
 public:
     Joint();
     Joint(Eigen::Vector3f offset);
@@ -58,7 +61,8 @@ public:
     std::vector<Joint*> flattenHierarchy();
     //Retorna o número de juntas na hierarquia
     int numJointsHierarchy();
-    void draw(Eigen::Matrix4f transformation);
+    void updateTransforms(Eigen::Matrix4f transformation);
+    void draw(Eigen::Matrix4f mv);
     //void draw(Eigen::Matrix4f view, Eigen::Matrix4f model);
     Eigen::Vector4f getPosition() const;
     Link *getLink() const;

@@ -235,6 +235,7 @@ void Kinematic::inverseKinematics(Joint *root, int linkEnd, Eigen::Vector4f targ
         j->setCurrRotation(updatedAngle);
         i++;
     }
+    root->updateTransforms(Eigen::Matrix4f::Identity());
     flush(cout);
 }
 
