@@ -146,26 +146,6 @@ int Joint::numJointsHierarchy()
 
 }
 
-void Joint::updateTransformations(Eigen::Matrix4f parentTransform)
-{
-    Eigen::Affine3f trans(Eigen::Translation3f(this->offset));
-    Eigen::Matrix4f jointTrans = trans.matrix();
-    //qDebug() << "rotation angle" << DEG2RAD(this->currRotation) << "\n";
-    Eigen::Affine3f rotation(this->currRotation);
-    Eigen::Matrix4f jointRot = rotation.matrix();
-
-    Eigen::Matrix4f concatTransform = parentTransform * jointTrans * jointRot;
-
-    Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
-    this->acumRotation = this->currRotation;
-    this->acumRotation.normalize();
-    this->position = concatTransform * pos;
-
-    for (const auto &childJoint : this->children) {
-        childJoint->draw(concatTransform);
-    }
-}
-
 /*
  * Recebe uma matriz de transformação vinda do link pai,
  * gera matrizes de transformação de acordo com os parâmetros da junta
