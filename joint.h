@@ -53,15 +53,14 @@ public:
     Joint* getNextChild();
     //Retorna toda a hierarquia a partir dessa junta como uma lista de juntas
     std::vector<Joint*> flattenHierarchy();
-    //Retorna o número de juntas na hierarquia
+    //Retorna o número de juntas na hierarquia, INCLUSIVE
     int numJointsHierarchy();
-    //Atualiza as posições dos objetos
-    void updateTransformations(Eigen::Matrix4f parentTransform);
-    void draw(Eigen::Matrix4f transformation);
+    //Retorna o número de juntas superiores na hierarquia, INCLUSIVE
+    int numJointsHierarchyUpwards();
+    void draw(Eigen::Matrix4f transformation, Eigen::Quaternionf quaternion);
     Eigen::Vector4f getPosition() const;
     Link *getLink() const;
     Eigen::Quaternionf getCurrRotation() const;
-    Eigen::Quaternionf getAccumRotation();
     Eigen::Vector3f getRotationAxis() const;
     Eigen::Quaternionf getAcumRotation() const;
 };

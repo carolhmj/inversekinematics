@@ -146,13 +146,23 @@ int Joint::numJointsHierarchy()
 
 }
 
+
+int Joint::numJointsHierarchyUpwards()
+{
+    if (parent == NULL) { //É a raiz
+        return 1;
+    } else { //Percorre a hierarquia e vê quantos pais existem
+        return parent->numJointsHierarchyUpwards() + 1;
+    }
+}
+
 /*
  * Recebe uma matriz de transformação vinda do link pai,
  * gera matrizes de transformação de acordo com os parâmetros da junta
  * (seu offset e seu ângulo atual), concatena e passa para o link
  * para desenho
  */
-void Joint::draw(Eigen::Matrix4f transformation)
+void Joint::draw(Eigen::Matrix4f transformation, Eigen::Quaternionf quaternion)
 {
 
     Eigen::Affine3f trans(Eigen::Translation3f(this->offset));
@@ -164,7 +174,7 @@ void Joint::draw(Eigen::Matrix4f transformation)
     Eigen::Matrix4f concatTransform = transformation * jointTrans * jointRot;
 
     Eigen::Vector4f pos(0.0,0.0,0.0,1.0);
-    this->acumRotation = this->currRotation;
+    this->acumRotation = quaternion * this->currRotation;
     this->acumRotation.normalize();
     this->position = concatTransform * pos;
 
@@ -186,7 +196,7 @@ void Joint::draw(Eigen::Matrix4f transformation)
     this->link->draw(concatTransform);
 
     for (const auto &childJoint : this->children) {
-        childJoint->draw(concatTransform);
+        childJoint->draw(concatTransform, acumRotation);
     }
 }
 
