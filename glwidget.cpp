@@ -137,10 +137,11 @@ void GLWidget::paintGL()
     Eigen::Affine3f x;
 
     this->root->draw(Eigen::Matrix4f::Identity(), Eigen::Quaternionf::Identity());
-    std::cout << "root:\n" << this->root->getPosition() << "\nroot rot:\n" << this->root->getAcumRotation().toRotationMatrix() << "\nroot transf global:\n" << this->root->getTransformGlobal() << std::endl;
-    std::cout << "j1:\n" << this->root->getChildren()[0]->getPosition() << "\nJ1 rot:\n" << this->root->getChildren()[0]->getAcumRotation().toRotationMatrix() << "\nj1 transf global:\n" << this->root->getChildren()[0]->getTransformGlobal() << std::endl;
-    std::cout << "j2:\n" << this->root->getChildren()[0]->getChildren()[0]->getPosition() << "\nj2 rot:\n" << this->root->getChildren()[0]->getChildren()[0]->getAcumRotation().toRotationMatrix() << "\nj2 transf global:\n" << this->root->getChildren()[0]->getChildren()[0]->getTransformGlobal() << std::endl;
-    std::cout << "upwards from j2 " << this->root->getChildren()[0]->getChildren()[0]->numJointsHierarchyUpwards() << std::endl;
+    Kinematic::inverseKinematics(this->root->getChildren()[0]->getChildren()[0], this->target, 0.005, 0.001);
+//    std::cout << "root:\n" << this->root->getPosition() << "\nroot rot:\n" << this->root->getAcumRotation().toRotationMatrix() << "\nroot transf global:\n" << this->root->getTransformGlobal() << std::endl;
+//    std::cout << "j1:\n" << this->root->getChildren()[0]->getPosition() << "\nJ1 rot:\n" << this->root->getChildren()[0]->getAcumRotation().toRotationMatrix() << "\nj1 transf global:\n" << this->root->getChildren()[0]->getTransformGlobal() << std::endl;
+//    std::cout << "j2:\n" << this->root->getChildren()[0]->getChildren()[0]->getPosition() << "\nj2 rot:\n" << this->root->getChildren()[0]->getChildren()[0]->getAcumRotation().toRotationMatrix() << "\nj2 transf global:\n" << this->root->getChildren()[0]->getChildren()[0]->getTransformGlobal() << std::endl;
+//    std::cout << "upwards from j2 " << this->root->getChildren()[0]->getChildren()[0]->numJointsHierarchyUpwards() << std::endl;
 }
 
 void GLWidget::mousePressEvent(QMouseEvent *event)
@@ -169,8 +170,7 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
         this->target = displayCoord;
         //this->target = worldCoord;
     } else if (event->button() == Qt::MidButton){
-        //Kinematic::inverseKinematics(this->root, end.head<3>(), target.head<3>(), 1);
-        //Kinematic::inverseKinematics(this->root, 2, target.head<3>(), Eigen::Quaternionf::Identity(), 1);
+
     }
 
 

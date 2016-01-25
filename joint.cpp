@@ -30,6 +30,11 @@ Eigen::Matrix4f Joint::getTransformGlobal() const
 {
     return transformGlobal;
 }
+
+Joint *Joint::getParent() const
+{
+    return parent;
+}
 Joint::Joint()
 {
 

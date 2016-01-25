@@ -61,41 +61,41 @@ std::vector<Eigen::Vector3f> Kinematic::getPose(Joint *root)
  */
 Eigen::MatrixXf Kinematic::jacobian(Joint *start, Eigen::Vector4f endEff)
 {
-//    /* Linhas da Jacobiana. Dependem do tipo de mudança que vai
-//     * ocorrer (se apenas linear ou se linear e rotacional). Teremos
-//     * 3 linhas para mudança apenas linear
-//     */
-//    int numRows = 3;
-//    /* Colunas da Jacobiana. Dependem da quantidade de juntas que temos
-//     */
-//    int numCols = 3*start->numJointsHierarchyUpwards();
+    /* Linhas da Jacobiana. Dependem do tipo de mudança que vai
+     * ocorrer (se apenas linear ou se linear e rotacional). Teremos
+     * 3 linhas para mudança apenas linear
+     */
+    int numRows = 3;
+    /* Colunas da Jacobiana. Dependem da quantidade de juntas que temos
+     */
+    int numCols = 3*start->numJointsHierarchyUpwards();
 
-//    //Criamos a Jacobiana agora!
-//    Eigen::MatrixXf jacobian(numRows,numCols);
+    //Criamos a Jacobiana agora!
+    Eigen::MatrixXf jacobian(numRows,numCols);
 
-//    //Matriz m, com as rotações
-//    Eigen::Matrix3f m;
-//    //Matriz px
-//    Eigen::Matrix3f px;
+    //Matriz m, com as rotações
+    Eigen::Matrix3f m;
+    //Matriz px
+    Eigen::Matrix3f px;
 
-//    Eigen::Vector4f p;
+    Eigen::Vector4f p;
 
-//    Joint *effector = start;
+    Joint *effector = start;
 
-//    int blockstart = 0;
-//    while (effector != NULL){
-//        p = endEff - effector->getPositionGlobal();
-//        px <<   0  , p(2), -p(1),
-//              -p(2),  0  ,  p(0),
-//               p(1),-p(0),   0  ;
+    int blockstart = 0;
+    while (effector != NULL){
+        p = endEff - effector->getPosition();
+        px <<   0  , p(2), -p(1),
+              -p(2),  0  ,  p(0),
+               p(1),-p(0),   0  ;
 
-//        m = (effector->getTransformGlobal().block<3,3>(0,0)).transpose();
-//        jacobian.block<3,3>(0,3*blockstart) = px*m;
-//        blockstart++;
-//        effector = effector->getParent();
-//    }
+        m = (effector->getTransformGlobal().block<3,3>(0,0)).transpose();
+        jacobian.block<3,3>(0,3*blockstart) = px*m;
+        blockstart++;
+        effector = effector->getParent();
+    }
 
-//    return jacobian;
+    return jacobian;
 }
 
 Eigen::MatrixXf Kinematic::pseudoInverse(Eigen::MatrixXf M)
@@ -116,28 +116,28 @@ Eigen::MatrixXf Kinematic::pseudoInverse(Eigen::MatrixXf M)
  */
 void Kinematic::inverseKinematics(Joint *effector, Eigen::Vector4f target, float adjustFactor, float tolerance)
 {
-//    Eigen::Vector4f effectorPosition = effector->getPositionGlobal();
-//    std::cout << "calculando nova aproximação, diferença de " << (effectorPosition - target).norm() << std::endl;
-//    if ((effectorPosition - target).norm() < tolerance) {
-//        std::cout << "tolerancia atingida\n";
-//        return;
-//    }
-//    flush(std::cout);
-//    Eigen::Vector3f e = (adjustFactor * (effectorPosition-target)).head<3>();
+    Eigen::Vector4f effectorPosition = effector->getPosition();
+    std::cout << "calculando nova aproximação, diferença de " << (effectorPosition - target).norm() << std::endl;
+    if ((effectorPosition - target).norm() < tolerance) {
+        std::cout << "tolerancia atingida\n";
+        return;
+    }
+    flush(std::cout);
+    Eigen::Vector3f e = (adjustFactor * (effectorPosition-target)).head<3>();
 
-//    Eigen::MatrixXf jacobianM = jacobian(effector, target);
-//    Eigen::MatrixXf jacobianPseudoInverse = pseudoInverse(jacobianM);
-//    Eigen::MatrixXf orientations = jacobianPseudoInverse * e;
+    Eigen::MatrixXf jacobianM = jacobian(effector, target);
+    Eigen::MatrixXf jacobianPseudoInverse = pseudoInverse(jacobianM);
+    Eigen::MatrixXf orientations = jacobianPseudoInverse * e;
 
-//    orientations = (180.f/M_PI) * orientations;
-//    Joint *currEffector = effector;
-//    int jointStart = 0;
-//    while (currEffector != NULL){
-//        currEffector->acumCurrRotation(orientations(3*jointStart, 0), orientations(3*jointStart+1, 0), orientations(3*jointStart+2, 0));
-//        currEffector = currEffector->getParent();
-//        jointStart++;
-//    }
+    orientations = (180.f/M_PI) * orientations;
+    Joint *currEffector = effector;
+    int jointStart = 0;
+    while (currEffector != NULL){
+        currEffector->acumCurrRotation(orientations(3*jointStart, 0), orientations(3*jointStart+1, 0), orientations(3*jointStart+2, 0));
+        currEffector = currEffector->getParent();
+        jointStart++;
+    }
 
-//    flush(cout);
+    flush(cout);
 }
 

@@ -67,6 +67,7 @@ public:
     Eigen::Vector3f getRotationAxis() const;
     Eigen::Quaternionf getAcumRotation() const;
     Eigen::Matrix4f getTransformGlobal() const;
+    Joint *getParent() const;
 };
 
 #endif // JOINT_H
