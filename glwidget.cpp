@@ -81,6 +81,7 @@ void GLWidget::initializeGL()
     Link *l = new Link(ldata1,ldata1center);
     this->root->setLink(l);
     this->root->setCurrRotation(0,0,45);
+    this->root->acumCurrRotation(0,0,45);
     //this->root->setCurrRotation(90,0,0);
 
     Joint* j1 = new Joint(Eigen::Vector3f(0.0f,1.0f,0.0f));

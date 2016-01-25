@@ -79,6 +79,25 @@ void Joint::setCurrRotation(float x, float y, float z)
     this->rotationAxis = Eigen::AngleAxisf(currRotation).axis();
 }
 
+void Joint::acumCurrRotation(float x, float y, float z)
+{
+    this->currRotationEuler = this->currRotationEuler + Eigen::Vector3f(x,y,z);
+
+    //Transforma os ângulos em ângulo-eixo
+    Eigen::AngleAxisf xRotation(DEG2RAD(x), Eigen::Vector3f::UnitX());
+    Eigen::AngleAxisf yRotation(DEG2RAD(y), Eigen::Vector3f::UnitY());
+    Eigen::AngleAxisf zRotation(DEG2RAD(z), Eigen::Vector3f::UnitZ());
+
+    //Concatena e normaliza para formar o quaternion
+    Eigen::Quaternionf rotationAmount = xRotation * yRotation * zRotation;
+    rotationAmount.normalize();
+    this->currRotation = this->currRotation * rotationAmount;
+    this->currRotation.normalize();
+
+    //Guarda o eixo de rotação
+    this->rotationAxis = Eigen::AngleAxisf(currRotation).axis();
+}
+
 Eigen::Vector3f Joint::getCurrRotationEuler() const
 {
     return this->currRotationEuler;

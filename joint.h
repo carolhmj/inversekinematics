@@ -45,6 +45,7 @@ public:
     Joint(Eigen::Vector3f offset, Eigen::Vector3f maxRotation, Eigen::Vector3f minRotation);
     void setCurrRotation(Eigen::Vector3f r);
     void setCurrRotation(float x, float y, float z);
+    void acumCurrRotation(float x, float y, float z);
     Eigen::Vector3f getCurrRotationEuler() const;
     void setLink(Link* l);
     void setParent(Joint* parent);
