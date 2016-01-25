@@ -19,8 +19,8 @@ protected:
     Eigen::Vector4f end;
 
     //Matrizes de projeção
-    Eigen::Matrix4f projection;
-    Eigen::Matrix4f view;
+    Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f view = Eigen::Matrix4f::Identity();
 
     //Cores
     float colorEnd[3] = {1,1,0};
@@ -36,8 +36,6 @@ public:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void drawCircle(Eigen::Vector3f center, float radius, float color[]);
-public slots:
-    void update();
 };
 
 #endif // GLWIDGET_H

@@ -59,124 +59,84 @@ std::vector<Eigen::Vector3f> Kinematic::getPose(Joint *root)
  * de uma junta específica a uma mudança no end effector. Agora vamos
  * tratar de juntas rotacionais com 3 DOFs (ball joints)
  */
-Eigen::MatrixXf Kinematic::jacobian(Joint *root, Eigen::Vector3f end)
+Eigen::MatrixXf Kinematic::jacobian(Joint *start, Eigen::Vector4f endEff)
 {
     /* Linhas da Jacobiana. Dependem do tipo de mudança que vai
-     * ocorrer (se apenas linear ou se linear e rotacional). Como temos
-     * mudança linear e rotacional de um end effector, temos 6 linhas
+     * ocorrer (se apenas linear ou se linear e rotacional). Teremos
+     * 3 linhas para mudança apenas linear
      */
-    int numRows = 6;
+    int numRows = 3;
     /* Colunas da Jacobiana. Dependem da quantidade de juntas que temos
      */
-    int numCols = root->numJointsHierarchy();
+    int numCols = 3*start->numJointsHierarchyUpwards();
 
     //Criamos a Jacobiana agora!
     Eigen::MatrixXf jacobian(numRows,numCols);
 
-    //Juntas num vetor para bem maior conveniência
-    std::vector<Joint*> joints = root->flattenHierarchy();
-    //Eixo de rotação
-    Eigen::Vector3f rotationAxis;
-    /* Colocando os termos na matrix. Sabemos que a mudança linear
-     * é o produto vetorial do vetor da junta ao end effector com
-     * o eixo de rotação. Já a mudança rotacional é o eixo de rotação
-     */
-    for (int j = 0; j < numCols; j++){
-        //Vetor da junta ao end effector
-        Eigen::Vector3f jointToEnd = end - joints.at(j)->getPosition().head<3>();
-        //Eixo de rotação
-        rotationAxis = Eigen::AngleAxisf(root->getAcumRotation()).axis();
-        cout << "rotation axis:\n" << rotationAxis << "\n";
-        Eigen::Vector3f cross = rotationAxis.cross(jointToEnd);
-        //Mudança linear
-        for (int i = 0; i < 3; i++){
-            jacobian(i,j) = cross(i);
-        }
-        //Mudança rotacional
-        for (int i = 3; i < 6; i++){
-            jacobian(i,j) = rotationAxis(3-i);
-        }
+    //Matriz m, com as rotações
+    Eigen::Matrix3f m;
+    //Matriz px
+    Eigen::Matrix3f px;
+
+    Eigen::Vector4f p;
+
+    Joint *effector = start;
+
+    int blockstart = 0;
+    while (effector != NULL){
+        p = endEff - effector->getPositionGlobal();
+        px <<   0  , p(2), -p(1),
+              -p(2),  0  ,  p(0),
+               p(1),-p(0),   0  ;
+
+        m = (effector->getTransformGlobal().block<3,3>(0,0)).transpose();
+        jacobian.block<3,3>(0,3*blockstart) = px*m;
+        blockstart++;
+        effector = effector->getParent();
     }
 
     return jacobian;
 }
 
+Eigen::MatrixXf Kinematic::pseudoInverse(Eigen::MatrixXf M)
+{
+    Eigen::MatrixXf M1(M.rows(), M.rows());
+    M1 = M * M.transpose();
+    Eigen::MatrixXf M2(M1.rows(), M1.cols());
+    M2 = M1.inverse();
+    Eigen::MatrixXf M3(M.cols(), M.rows());
+    M3 = M.transpose() * M2;
+    return M3;
+}
+
 /*
- * Dado um end effector e o link contendo o end effector (ponto do meio), calcula os ângulos das juntas para o
+ * Dado um end effector e a posição do end effector, calcula os ângulos das juntas para o
  * end effector alcançar aquele alvo.
  * Para isso calcula a jacobiana, a pseudoinversa, e resolve para encontrar os ângulos
  */
-void Kinematic::inverseKinematics(Joint *root, int linkEnd, Eigen::Vector3f targetPos, Eigen::Quaternionf targetRot, int timestep)
+void Kinematic::inverseKinematics(Joint *effector, Eigen::Vector4f target, float adjustFactor, float tolerance)
 {
-    //Pegamos todas as juntas para encontrarmos o end effector
-    std::vector<Joint*> joints = root->flattenHierarchy();
-    for (auto &j : joints) {
-        //cout << j->getCurrRotation() << "\n";
-    }
-    if (linkEnd >= joints.size()) {
+    Eigen::Vector4f effectorPosition = effector->getPositionGlobal();
+    std::cout << "calculando nova aproximação, diferença de " << (effectorPosition - target).norm() << std::endl;
+    if ((effectorPosition - target).norm() < tolerance) {
+        std::cout << "tolerancia atingida\n";
         return;
     }
+    flush(std::cout);
+    Eigen::Vector3f e = (adjustFactor * (effectorPosition-target)).head<3>();
 
-    Eigen::Vector3f endPos = joints.at(linkEnd)->getLink()->getCenterPointTransformed();
-    Eigen::Quaternionf endRot = joints.at(linkEnd)->getCurrRotation();
+    Eigen::MatrixXf jacobianM = jacobian(effector, target);
+    Eigen::MatrixXf jacobianPseudoInverse = pseudoInverse(jacobianM);
+    Eigen::MatrixXf orientations = jacobianPseudoInverse * e;
 
-    Eigen::Matrix<Eigen::Quaternionf, 6, 1> v;
-
-    //Vetor velocidade
-    Eigen::Vector3f x = endPos - targetPos;
-    for (int i = 0; i < 3; i++) {
-        v(i) = Eigen::Quaternionf(x(i), 0, 0, 0);
+    orientations = (180.f/M_PI) * orientations;
+    Joint *currEffector = effector;
+    int jointStart = 0;
+    while (currEffector != NULL){
+        currEffector->acumCurrRotation(orientations(3*jointStart, 0), orientations(3*jointStart+1, 0), orientations(3*jointStart+2, 0));
+        currEffector = currEffector->getParent();
     }
-    //If you want to find a quaternion diff such that diff * q1 == q2, then you need to use the multiplicative inverse:
-    Eigen::Quaternionf diff = targetRot * endRot.inverse();
-    diff.normalize();
-//    for (int i = 3; i < 6; i++) {
-//        v(i) = diff[3-i];
-//    }
 
-////    cout << "velocidade" << v << "\n";
-//    //Jacobiana
-//    Eigen::MatrixXf J = jacobian(root,endPos);
-////    cout << "jacobiana\n" << J << "\n";
-
-//    /*
-//     * Como eu não sei se é possível fazer o Eigen trabalhar com matrizes de quaternions,
-//     * vou usar o método da jacobiana transposta
-//     */
-//    Eigen::MatrixXf JT = J.transpose();
-//    Eigen::Matrix<Eigen::Quaternionf, 6, 1> theta;
-//    for (int i = 0; i < JT.rows(); i++){
-//        Eigen::Quaternionf sum = Eigen::Quaternionf::Identity();
-//        for (int j = 0; j < JT.cols(); j++){
-//            Eigen::Quaternionf q(JT(i,j) * v(j).coeffs());
-//            q.normalize();
-//            sum = sum.coeffs() + q.coeffs();
-//        }
-//        theta(i) = sum;
-//    }
-
-//    //Atualizando...
-//    int i = 0;
-//    for (auto &j : joints) {
-//        Eigen::Quaternionf updatedRotation = Eigen::Quaternionf::Identity();
-//        updatedRotation = j->getCurrRotation().coeffs() + theta(i).coeffs()*timestep;
-//        updatedRotation.normalize();
-//        //j->setCurrRotation(updatedRotation);
-//    }
-
-    /*
-     * Aplicando os passos mostrados na página 209 do livro
-     */
-//    Eigen::Matrix<Eigen::Quaternionf, 6, 1> beta = (J * J.transpose()).householderQr().solve(v);
-//    cout << "beta\n" << beta << "\n";
-//    Eigen::Matrix<Eigen::Quaternionf, 6, 1> thetaVar = J.transpose() * beta;
-//    cout << "thetaVar:\n" << thetaVar << "\n";
-//    int i = 0;
-////    for (auto &j : joints) {
-////        float updatedAngle = j->getCurrRotation() + thetaVar(i)*timestep;
-////        j->setCurrRotation(updatedAngle);
-////        i++;
-////    }
-//    flush(cout);
+    flush(cout);
 }
 
