@@ -137,9 +137,9 @@ void GLWidget::paintGL()
     Eigen::Affine3f x;
 
     this->root->draw(Eigen::Matrix4f::Identity(), Eigen::Quaternionf::Identity());
-    std::cout << "root:\n" << this->root->getPosition() << "\nroot rot:\n" << this->root->getAcumRotation().toRotationMatrix() << std::endl;
-    std::cout << "j1:\n" << this->root->getChildren()[0]->getPosition() << "\nJ1 rot:\n" << this->root->getChildren()[0]->getAcumRotation().toRotationMatrix() << std::endl;
-    std::cout << "j2:\n" << this->root->getChildren()[0]->getChildren()[0]->getPosition() << "\nj2 rot:\n" << this->root->getChildren()[0]->getChildren()[0]->getAcumRotation().toRotationMatrix() << std::endl;
+    std::cout << "root:\n" << this->root->getPosition() << "\nroot rot:\n" << this->root->getAcumRotation().toRotationMatrix() << "\nroot transf global:\n" << this->root->getTransformGlobal() << std::endl;
+    std::cout << "j1:\n" << this->root->getChildren()[0]->getPosition() << "\nJ1 rot:\n" << this->root->getChildren()[0]->getAcumRotation().toRotationMatrix() << "\nj1 transf global:\n" << this->root->getChildren()[0]->getTransformGlobal() << std::endl;
+    std::cout << "j2:\n" << this->root->getChildren()[0]->getChildren()[0]->getPosition() << "\nj2 rot:\n" << this->root->getChildren()[0]->getChildren()[0]->getAcumRotation().toRotationMatrix() << "\nj2 transf global:\n" << this->root->getChildren()[0]->getChildren()[0]->getTransformGlobal() << std::endl;
     std::cout << "upwards from j2 " << this->root->getChildren()[0]->getChildren()[0]->numJointsHierarchyUpwards() << std::endl;
 }
 

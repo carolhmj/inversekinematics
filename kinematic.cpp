@@ -135,6 +135,7 @@ void Kinematic::inverseKinematics(Joint *effector, Eigen::Vector4f target, float
 //    while (currEffector != NULL){
 //        currEffector->acumCurrRotation(orientations(3*jointStart, 0), orientations(3*jointStart+1, 0), orientations(3*jointStart+2, 0));
 //        currEffector = currEffector->getParent();
+//        jointStart++;
 //    }
 
 //    flush(cout);

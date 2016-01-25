@@ -25,6 +25,11 @@ Eigen::Quaternionf Joint::getAcumRotation() const
 {
     return acumRotation;
 }
+
+Eigen::Matrix4f Joint::getTransformGlobal() const
+{
+    return transformGlobal;
+}
 Joint::Joint()
 {
 
@@ -196,7 +201,7 @@ void Joint::draw(Eigen::Matrix4f transformation, Eigen::Quaternionf quaternion)
     this->acumRotation = quaternion * this->currRotation;
     this->acumRotation.normalize();
     this->position = concatTransform * pos;
-
+    this->transformGlobal = concatTransform;
 
 
     //qDebug() << "position: " << this->position[0] << " " << this->position[1] << " " << this->position[2] << "\n";

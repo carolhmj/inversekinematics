@@ -39,6 +39,8 @@ private:
     std::vector<Joint*> children;
     //Último filho visitado, usado na função getNextChild
     unsigned int lastChildVisited = 0;
+    //Matriz de transformação global
+    Eigen::Matrix4f transformGlobal;
 public:
     Joint();
     Joint(Eigen::Vector3f offset);
@@ -64,6 +66,7 @@ public:
     Eigen::Quaternionf getCurrRotation() const;
     Eigen::Vector3f getRotationAxis() const;
     Eigen::Quaternionf getAcumRotation() const;
+    Eigen::Matrix4f getTransformGlobal() const;
 };
 
 #endif // JOINT_H
