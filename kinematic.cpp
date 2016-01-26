@@ -59,7 +59,7 @@ std::vector<Eigen::Vector3f> Kinematic::getPose(Joint *root)
  * de uma junta específica a uma mudança no end effector. Agora vamos
  * tratar de juntas rotacionais com 3 DOFs (ball joints)
  */
-Eigen::MatrixXf Kinematic::jacobian(Joint *start, Eigen::Vector4f endEff)
+Eigen::MatrixXf Kinematic::jacobian(Joint *start, Eigen::Vector4f target)
 {
     /* Linhas da Jacobiana. Dependem do tipo de mudança que vai
      * ocorrer (se apenas linear ou se linear e rotacional). Teremos
@@ -84,7 +84,7 @@ Eigen::MatrixXf Kinematic::jacobian(Joint *start, Eigen::Vector4f endEff)
 
     int blockstart = 0;
     while (effector != NULL){
-        p = endEff - effector->getPosition();
+        p = target - effector->getPosition();
         px <<   0  , p(2), -p(1),
               -p(2),  0  ,  p(0),
                p(1),-p(0),   0  ;
@@ -116,7 +116,9 @@ Eigen::MatrixXf Kinematic::pseudoInverse(Eigen::MatrixXf M)
  */
 void Kinematic::inverseKinematics(Joint *effector, Eigen::Vector4f target, float adjustFactor, float tolerance)
 {
-    Eigen::Vector4f effectorPosition = effector->getPosition();
+    Eigen::Vector4f effectorPosition = effector->getTransformGlobal() * effector->getLink()->getCenterPoint();
+    std::cout << "effector position:\n" << effectorPosition << std::endl;
+//    std::cout << "target:\n" << target << std::endl;
     std::cout << "calculando nova aproximação, diferença de " << (effectorPosition - target).norm() << std::endl;
     if ((effectorPosition - target).norm() < tolerance) {
         std::cout << "tolerancia atingida\n";
@@ -125,7 +127,7 @@ void Kinematic::inverseKinematics(Joint *effector, Eigen::Vector4f target, float
     flush(std::cout);
     Eigen::Vector3f e = (adjustFactor * (effectorPosition-target)).head<3>();
 
-    Eigen::MatrixXf jacobianM = jacobian(effector, target);
+    Eigen::MatrixXf jacobianM = jacobian(effector, effectorPosition);
     Eigen::MatrixXf jacobianPseudoInverse = pseudoInverse(jacobianM);
     Eigen::MatrixXf orientations = jacobianPseudoInverse * e;
 

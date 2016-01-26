@@ -13,7 +13,7 @@ public:
     Kinematic();
     static void applyPose(Joint *root, std::vector<Eigen::Vector3f> pose);
     static std::vector<Eigen::Vector3f> getPose(Joint *root);
-    static Eigen::MatrixXf jacobian(Joint *start, Eigen::Vector4f endEff);
+    static Eigen::MatrixXf jacobian(Joint *start, Eigen::Vector4f target);
     static Eigen::MatrixXf pseudoInverse(Eigen::MatrixXf M);
     static void inverseKinematics(Joint *effector, Eigen::Vector4f target, float adjustFactor, float tolerance);
 };

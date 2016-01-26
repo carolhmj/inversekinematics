@@ -28,7 +28,7 @@ void GLWidget::initializeGL()
     this->root = new Joint(Eigen::Vector3f(0.0f,0.0f,0.0f));
 
     std::vector<Eigen::Vector4f> ldata1;
-    Eigen::Vector3f ldata1center(0,2,0);
+    Eigen::Vector4f ldata1center(0,1,0,1);
 
     ldata1.push_back(Eigen::Vector4f(0.5,3,-0.5,1));
     ldata1.push_back(Eigen::Vector4f(0.5,3,0.5,1));
@@ -80,18 +80,18 @@ void GLWidget::initializeGL()
 
     Link *l = new Link(ldata1,ldata1center);
     this->root->setLink(l);
-    this->root->setCurrRotation(0,0,45);
+    this->root->setCurrRotation(0,0,0);
     this->root->acumCurrRotation(0,0,45);
     //this->root->setCurrRotation(90,0,0);
 
     Joint* j1 = new Joint(Eigen::Vector3f(0.0f,1.0f,0.0f));
-    j1->setCurrRotation(0,0,45);
+    j1->setCurrRotation(0,0,0);
     this->root->addChild(j1);
     Link *l1 = new Link(ldata1,ldata1center);
     j1->setLink(l1);
 
     Joint* j2 = new Joint(Eigen::Vector3f(0.0f,1.0f,0.0f));
-    j2->setCurrRotation(90,0,0);
+    j2->setCurrRotation(0,0,0);
     //j2->setCurrRotation(0,0,45);
     j1->addChild(j2);
     Link *l2 = new Link(ldata1, ldata1center);
@@ -137,7 +137,7 @@ void GLWidget::paintGL()
     Eigen::Affine3f x;
 
     this->root->draw(Eigen::Matrix4f::Identity(), Eigen::Quaternionf::Identity());
-    Kinematic::inverseKinematics(this->root->getChildren()[0]->getChildren()[0], this->target, 0.005, 0.001);
+    Kinematic::inverseKinematics(this->root->getChildren()[0]->getChildren()[0], this->target, 0.0005, 0.01);
 //    std::cout << "root:\n" << this->root->getPosition() << "\nroot rot:\n" << this->root->getAcumRotation().toRotationMatrix() << "\nroot transf global:\n" << this->root->getTransformGlobal() << std::endl;
 //    std::cout << "j1:\n" << this->root->getChildren()[0]->getPosition() << "\nJ1 rot:\n" << this->root->getChildren()[0]->getAcumRotation().toRotationMatrix() << "\nj1 transf global:\n" << this->root->getChildren()[0]->getTransformGlobal() << std::endl;
 //    std::cout << "j2:\n" << this->root->getChildren()[0]->getChildren()[0]->getPosition() << "\nj2 rot:\n" << this->root->getChildren()[0]->getChildren()[0]->getAcumRotation().toRotationMatrix() << "\nj2 transf global:\n" << this->root->getChildren()[0]->getChildren()[0]->getTransformGlobal() << std::endl;
