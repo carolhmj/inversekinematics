@@ -89,6 +89,15 @@ void Joint::setCurrRotation(float x, float y, float z)
     this->rotationAxis = Eigen::AngleAxisf(currRotation).axis();
 }
 
+void Joint::setCurrRotation(float i, float j, float k, float a)
+{
+    Eigen::AngleAxisf rot(DEG2RAD(a), Eigen::Vector3f(i,j,k));
+    this->currRotation = rot;
+    this->currRotation.normalize();
+
+    this->rotationAxis = Eigen::Vector3f(i,j,k);
+}
+
 void Joint::acumCurrRotation(float x, float y, float z)
 {
     this->currRotationEuler = this->currRotationEuler + Eigen::Vector3f(x,y,z);

@@ -16,11 +16,6 @@ protected:
     Joint* root;
     QTimer timer;
     Eigen::Vector4f target;
-    Eigen::Vector4f end;
-
-    //Matrizes de projeção
-    Eigen::Matrix4f projection;
-    Eigen::Matrix4f view;
 
     //Cores
     float colorEnd[3] = {1,1,0};

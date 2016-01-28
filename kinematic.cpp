@@ -98,7 +98,7 @@ Eigen::MatrixXf Kinematic::jacobian(Joint *start, Eigen::Vector4f target)
     return jacobian;
 }
 
-Eigen::MatrixXf Kinematic::pseudoInverse(Eigen::MatrixXf M)
+Eigen::MatrixXf Kinematic::pseudoInverseJacobian(Eigen::MatrixXf M)
 {
     Eigen::MatrixXf M1(M.rows(), M.rows());
     M1 = M * M.transpose();
@@ -128,7 +128,8 @@ void Kinematic::inverseKinematics(Joint *effector, Eigen::Vector4f target, float
     Eigen::Vector3f e = (adjustFactor * (effectorPosition-target)).head<3>();
 
     Eigen::MatrixXf jacobianM = jacobian(effector, effectorPosition);
-    Eigen::MatrixXf jacobianPseudoInverse = pseudoInverse(jacobianM);
+    Eigen::MatrixXf jacobianPseudoInverse(jacobianM.cols(), jacobianM.rows());
+    jacobianPseudoInverse = Kinematic::pseudoInverse(jacobianM);
     Eigen::MatrixXf orientations = jacobianPseudoInverse * e;
 
     orientations = (180.f/M_PI) * orientations;
